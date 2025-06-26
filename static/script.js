@@ -86,9 +86,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         <button class="delete-btn" onclick="deleteItem(${item.sequenza}, ${item.id})">×</button>
                     </div>
                     <div class="item-info">
-                        <span>Sequenza:</span> ${item.sequenza}
-                        <span>Colore:</span> ${item.colore}
-                        <span>Pronto:</span> ${item.pronto}
+                        <span><span class="info-label">Sequenza:</span> <span class="info-value">${item.sequenza}</span></span>
+                        <span><span class="info-label">Colore:</span> <span class="info-value">${item.colore}</span></span>
+                        <span><span class="info-label">Pronto:</span> <span class="info-value">${item.pronto}</span></span>
                         ${item.reintegro === 'Si' ? '<span class="reintegro-badge">REINTEGRO</span>' : ''}
                     </div>
                     <div class="item-grid">
@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="row-header">Spalle</div>
                         ${(item.spalle || []).map(val => `<div>${val || ''}</div>`).join('')}
                     </div>
-                    ${item.note ? `<div class="item-note"><span>Note:</span> ${item.note}</div>` : ''}
+                    ${item.note ? `<div class="item-note"><span class="info-label">Note:</span> <span class="info-value">${item.note}</span></div>` : ''}
                     <div class="item-timestamp">Creato: ${new Date(item.timestamp).toLocaleString('it-IT')}</div>
                 </div>
             `).join('');
@@ -155,6 +155,13 @@ function setupModal() {
 function editItem(item) {
     document.getElementById('editItemId').value = item.id;
     document.getElementById('editItemSequence').value = item.sequenza; 
+    
+    // Popola il campo sequenza se esiste (sia input che select)
+    const editSequenza = document.getElementById('editSequenza');
+    if (editSequenza) {
+        editSequenza.value = item.sequenza;
+    }
+    
     document.getElementById('editColore').value = item.colore;
     document.getElementById('editPronto').value = item.pronto;
     document.getElementById('editReintegro').checked = (item.reintegro === 'Si'); // Set checkbox state
@@ -178,10 +185,16 @@ window.editItem = editItem; // Make it global
 
 async function updateItem() {
     const itemId = document.getElementById('editItemId').value;
-    const sequence = document.getElementById('editItemSequence').value; 
+    const originalSequence = document.getElementById('editItemSequence').value; 
+    const newSequence = document.getElementById('editSequenza').value; // Get from the select field
 
-    if (!sequence) {
-        alert('Errore: Sequenza dell\'elemento da modificare non trovata.');
+    if (!originalSequence) {
+        alert('Errore: Sequenza originale dell\'elemento da modificare non trovata.');
+        return;
+    }
+
+    if (!newSequence) {
+        alert('Errore: Nuova sequenza non selezionata.');
         return;
     }
 
@@ -208,31 +221,71 @@ async function updateItem() {
     });
 
     try {
-        const response = await fetch(`/api/update_item/${sequence}/${itemId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
-        });
+        // Se la sequenza è cambiata, dobbiamo prima eliminare l'elemento dalla sequenza originale
+        // e poi crearlo nella nuova sequenza
+        if (originalSequence !== newSequence) {
+            // Prima creiamo il nuovo elemento nella nuova sequenza
+            const createData = {
+                ...formData,
+                sequenza: newSequence
+            };
+            
+            const createResponse = await fetch('/api/add_item', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(createData)
+            });
 
-        const result = await response.json().catch(() => null);
+            const createResult = await createResponse.json().catch(() => null);
 
-        if (response.ok && result && result.success) {
-            document.getElementById('editModal').style.display = 'none';
-            if (typeof loadRecentItems === 'function') { 
-                loadRecentItems();
+            if (createResponse.ok && createResult && createResult.success) {
+                // Se la creazione è riuscita, eliminiamo l'elemento originale
+                const deleteResponse = await fetch(`/api/delete_item/${originalSequence}/${itemId}`, {
+                    method: 'DELETE'
+                });
+                
+                const deleteResult = await deleteResponse.json().catch(() => null);
+                
+                if (!deleteResponse.ok || !deleteResult || !deleteResult.success) {
+                    console.warn('Errore nell\'eliminazione dell\'elemento originale, ma nuovo elemento creato');
+                }
+            } else {
+                const errorMsg = createResult ? createResult.error : 'Errore durante la creazione dell\'elemento nella nuova sequenza';
+                alert(errorMsg);
+                console.error('Error creating item in new sequence:', createResult);
+                return;
             }
-            // If on a sequence page, this function might not exist directly, but we call its equivalent
-            if (typeof loadSequenceItems === 'function') {
-                loadSequenceItems();
-            }
-
         } else {
-            const errorMsg = result ? result.error : 'Errore durante l\'aggiornamento dell\'elemento';
-            alert(errorMsg);
-            console.error('Error updating item:', result);
+            // Se la sequenza non è cambiata, facciamo un normale update
+            const response = await fetch(`/api/update_item/${originalSequence}/${itemId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const result = await response.json().catch(() => null);
+
+            if (!response.ok || !result || !result.success) {
+                const errorMsg = result ? result.error : 'Errore durante l\'aggiornamento dell\'elemento';
+                alert(errorMsg);
+                console.error('Error updating item:', result);
+                return;
+            }
         }
+
+        // Chiudi il modale e ricarica i dati
+        document.getElementById('editModal').style.display = 'none';
+        if (typeof loadRecentItems === 'function') { 
+            loadRecentItems();
+        }
+        if (typeof loadSequenceItems === 'function') {
+            loadSequenceItems();
+        }
+
     } catch (error) {
         console.error('Error in updateItem fetch:', error);
         alert('Errore di comunicazione durante l\'aggiornamento dell\'elemento.');

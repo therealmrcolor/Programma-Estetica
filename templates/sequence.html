@@ -35,6 +35,18 @@
             <form id="editForm" class="data-form">
                 <div class="form-row">
                     <div class="form-group">
+                        <label for="editSequenza">SEQUENZA</label>
+                        <select id="editSequenza" name="sequenza" required>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label for="editColore">COLORE</label>
                         <input type="text" id="editColore" name="colore" required>
                     </div>
@@ -103,7 +115,7 @@
                 </div>
 
                 <input type="hidden" id="editItemId">
-                <!-- editItemSequence is not needed here as sequenceNum is global in sequence.js -->
+                <input type="hidden" id="editItemSequence">
                 <button type="submit" class="submit-btn">Salva Modifiche</button>
             </form>
         </div>
@@ -113,6 +125,7 @@
         const sequenceNum = {{ seq_num }};
         const apiBaseUrl = window.location.origin; // Not strictly needed but good practice
     </script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
     <script src="{{ url_for('static', filename='sequence.js') }}"></script>
 </body>
 </html>

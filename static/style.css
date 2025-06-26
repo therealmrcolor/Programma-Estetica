@@ -100,6 +100,12 @@ textarea {
     font-size: 14px;
 }
 
+input[readonly] {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    cursor: not-allowed;
+}
+
 textarea {
     height: 100px;
     resize: vertical;
@@ -240,9 +246,19 @@ textarea {
 }
 
 .item-info span {
-    font-weight: bold;
     margin-right: 5px; /* Reduced margin */
 }
+
+.item-info .info-label {
+    font-weight: normal;
+    color: #666;
+}
+
+.item-info .info-value {
+    font-weight: bold;
+    color: #333;
+}
+
 .item-info > span:not(:last-child) {
     margin-right: 15px; /* Space between info elements */
 }
@@ -254,8 +270,13 @@ textarea {
     font-style: italic;
     color: #555;
 }
-.item-note span {
+.item-note .info-label {
     font-weight: bold;
+    font-style: normal;
+}
+.item-note .info-value {
+    font-weight: normal;
+    font-style: italic;
 }
 
 

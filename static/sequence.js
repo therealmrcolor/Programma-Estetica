@@ -36,8 +36,8 @@ async function loadSequenceItems() {
                     <button class="delete-btn" onclick="deleteItem(${sequenceNum}, ${item.id})">×</button>
                 </div>
                 <div class="item-info">
-                    <span>Colore:</span> ${item.colore}
-                    <span>Pronto:</span> ${item.pronto}
+                    <span><span class="info-label">Colore:</span> <span class="info-value">${item.colore}</span></span>
+                    <span><span class="info-label">Pronto:</span> <span class="info-value">${item.pronto}</span></span>
                     ${item.reintegro === 'Si' ? '<span class="reintegro-badge">REINTEGRO</span>' : ''}
                 </div>
                 <div class="item-grid">
@@ -63,7 +63,7 @@ async function loadSequenceItems() {
                     <div class="row-header">Spalle</div>
                     ${(item.spalle || []).map(val => `<div>${val || ''}</div>`).join('')}
                 </div>
-                ${item.note ? `<div class="item-note"><span>Note:</span> ${item.note}</div>` : ''}
+                ${item.note ? `<div class="item-note"><span class="info-label">Note:</span> <span class="info-value">${item.note}</span></div>` : ''}
                 <div class="item-timestamp">Creato: ${new Date(item.timestamp).toLocaleString('it-IT')}</div>
             </div>
         `).join('');
