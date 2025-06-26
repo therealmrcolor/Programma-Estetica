@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sequenza {{ seq_num }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <a href="/" class="nav-item">Inserimento</a>
+        <a href="/sequence/1" class="nav-item">SEQ 1</a>
+        <a href="/sequence/2" class="nav-item">SEQ 2</a>
+        <a href="/sequence/3" class="nav-item">SEQ 3</a>
+        <a href="/sequence/4" class="nav-item">SEQ 4</a>
+        <a href="/sequence/5" class="nav-item">SEQ 5</a>
+        <a href="/sequence/6" class="nav-item">SEQ 6</a>
+        <a href="/sequence/7" class="nav-item">SEQ 7</a>
+    </nav>
+
+    <div class="container">
+        <div class="sequence-header">
+            <h1>Sequenza {{ seq_num }}</h1>
+            <button onclick="clearSequence({{ seq_num }})" class="clear-btn">Svuota Sequenza</button>
+        </div>
+        
+        <div id="sequenceItems" class="sequence-items-container"></div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close">×</span>
+            <h2>Modifica Elemento</h2>
+            <form id="editForm" class="data-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editColore">COLORE</label>
+                        <input type="text" id="editColore" name="colore" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editPronto">PRONTO</label>
+                        <select id="editPronto" name="pronto" required>
+                            <option value="Si">Si</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                     <div class="form-group form-group-reintegro">
+                        <input type="checkbox" id="editReintegro" name="reintegro">
+                        <label for="editReintegro" class="reintegro-label">REINTEGRO</label>
+                    </div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="editNote">NOTE</label>
+                    <textarea id="editNote" name="note"></textarea>
+                </div>
+
+                <div class="ub-grid">
+                    <div class="row-header"></div>
+                    <div class="ub-header">UB 1</div>
+                    <div class="ub-header">UB 2</div>
+                    <div class="ub-header">UB 3</div>
+                    <div class="ub-header">UB 4</div>
+                    <div class="ub-header">UB 5</div>
+
+                    <div class="row-header">Carretti Vert</div>
+                    <input type="text" name="carretti_vert" value="">
+                    <input type="text" name="carretti_vert" value="">
+                    <input type="text" name="carretti_vert" value="">
+                    <input type="text" name="carretti_vert" value="">
+                    <input type="text" name="carretti_vert" value="">
+
+                    <div class="row-header">Tavoli</div>
+                    <input type="text" name="tavoli" value="">
+                    <input type="text" name="tavoli" value="">
+                    <input type="text" name="tavoli" value="">
+                    <input type="text" name="tavoli" value="">
+                    <input type="text" name="tavoli" value="">
+
+                    <div class="row-header">Pedane</div>
+                    <input type="text" name="pedane" value="">
+                    <input type="text" name="pedane" value="">
+                    <input type="text" name="pedane" value="">
+                    <input type="text" name="pedane" value="">
+                    <input type="text" name="pedane" value="">
+
+                    <div class="row-header">Contenitori</div>
+                    <input type="text" name="contenitori" value="">
+                    <input type="text" name="contenitori" value="">
+                    <input type="text" name="contenitori" value="">
+                    <input type="text" name="contenitori" value="">
+                    <input type="text" name="contenitori" value="">
+
+                    <div class="row-header">Spalle</div>
+                    <input type="text" name="spalle" value="">
+                    <input type="text" name="spalle" value="">
+                    <input type="text" name="spalle" value="">
+                    <input type="text" name="spalle" value="">
+                    <input type="text" name="spalle" value="">
+                </div>
+
+                <input type="hidden" id="editItemId">
+                <!-- editItemSequence is not needed here as sequenceNum is global in sequence.js -->
+                <button type="submit" class="submit-btn">Salva Modifiche</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const sequenceNum = {{ seq_num }};
+        const apiBaseUrl = window.location.origin; // Not strictly needed but good practice
+    </script>
+    <script src="{{ url_for('static', filename='sequence.js') }}"></script>
+</body>
+</html>
