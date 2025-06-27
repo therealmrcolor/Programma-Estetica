@@ -24,6 +24,7 @@ async function loadSequenceItems() {
 
         if (!items || items.length === 0) {
             sequenceItemsEl.innerHTML = "<p>Nessun elemento in questa sequenza.</p>";
+            updateColorsRecap([]); // Update colors recap with empty array
             return;
         }
         
@@ -67,10 +68,68 @@ async function loadSequenceItems() {
                 <div class="item-timestamp">Creato: ${new Date(item.timestamp).toLocaleString('it-IT')}</div>
             </div>
         `).join('');
+
+        // Update colors recap
+        updateColorsRecap(items);
     } catch (error) {
         console.error('Error loading sequence items:', error);
         document.getElementById('sequenceItems').innerHTML = "<p>Errore critico nel caricamento degli elementi della sequenza.</p>";
+        updateColorsRecap([]); // Update colors recap with empty array on error
     }
+}
+
+function updateColorsRecap(items) {
+    const colorsListEl = document.getElementById('colorsList');
+    
+    // Always start with the header
+    let html = `
+        <div class="colors-header">
+            <div class="colors-header-item">Colore</div>
+            <div class="colors-header-item">Qty</div>
+        </div>
+    `;
+    
+    if (!items || items.length === 0) {
+        html += `
+            <div class="colors-empty">
+                <div>Nessun colore presente</div>
+            </div>
+        `;
+        colorsListEl.innerHTML = html;
+        return;
+    }
+
+    // Count colors
+    const colorCounts = {};
+    items.forEach(item => {
+        if (item.colore && item.colore.trim()) {
+            const color = item.colore.trim().toUpperCase();
+            colorCounts[color] = (colorCounts[color] || 0) + 1;
+        }
+    });
+
+    // Sort colors alphabetically
+    const sortedColors = Object.keys(colorCounts).sort();
+
+    if (sortedColors.length === 0) {
+        html += `
+            <div class="colors-empty">
+                <div>Nessun colore presente</div>
+            </div>
+        `;
+        colorsListEl.innerHTML = html;
+        return;
+    }
+
+    // Generate table rows
+    html += sortedColors.map(color => `
+        <div class="color-row">
+            <div class="color-item">${color}</div>
+            <div class="color-count">${colorCounts[color]}</div>
+        </div>
+    `).join('');
+
+    colorsListEl.innerHTML = html;
 }
 window.loadSequenceItems = loadSequenceItems; // Make global for calls from updateItem/deleteItem
 
@@ -85,7 +144,7 @@ async function clearSequence(sequence) {
             const result = await response.json().catch(() => null);
 
             if (response.ok && result && result.success) {
-                loadSequenceItems(); 
+                loadSequenceItems(); // This will also update the colors recap
             } else {
                 const errorMsg = result ? result.error : 'Errore durante la pulizia della sequenza';
                 alert(errorMsg);

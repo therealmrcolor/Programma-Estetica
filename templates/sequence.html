@@ -20,11 +20,29 @@
 
     <div class="container">
         <div class="sequence-header">
-            <h1>Sequenza {{ seq_num }}</h1>
-            <button onclick="clearSequence({{ seq_num }})" class="clear-btn">Svuota Sequenza</button>
+            <div class="sequence-header-left">
+                <h1>Sequenza {{ seq_num }}</h1>
+                <button onclick="clearSequence({{ seq_num }})" class="clear-btn">Svuota Sequenza</button>
+            </div>
         </div>
         
-        <div id="sequenceItems" class="sequence-items-container"></div>
+        <div class="main-content">
+            <div id="sequenceItems" class="sequence-items-container"></div>
+            <div class="colors-recap-sidebar">
+                <div class="colors-recap">
+                    <h3>Colori presenti</h3>
+                    <div id="colorsList" class="colors-list">
+                        <div class="colors-header">
+                            <div class="colors-header-item">Colore</div>
+                            <div class="colors-header-item">Qty</div>
+                        </div>
+                        <div class="colors-empty">
+                            <div>Nessun colore presente</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Edit Modal -->
