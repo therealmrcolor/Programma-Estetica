@@ -223,19 +223,19 @@ textarea {
 .colors-recap {
     background-color: white;
     border-radius: 8px;
-    padding: 15px;
+    padding: 12px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    min-width: 200px;
+    min-width: 180px;
     border: 1px solid #dee2e6;
 }
 
 .colors-recap h3 {
-    margin: 0 0 12px 0;
-    font-size: 14px;
+    margin: 0 0 10px 0;
+    font-size: 12px;
     color: #333;
     text-align: center;
     border-bottom: 2px solid #007bff;
-    padding-bottom: 8px;
+    padding-bottom: 6px;
     font-weight: bold;
 }
 
@@ -298,9 +298,9 @@ textarea {
 
 .colors-header-item {
     display: table-cell;
-    padding: 8px 12px;
+    padding: 6px 8px;
     font-weight: bold;
-    font-size: 12px;
+    font-size: 10px;
     color: #495057;
     text-align: center;
     border-bottom: 2px solid #dee2e6;
@@ -311,48 +311,67 @@ textarea {
     border-right: none;
 }
 
-/* Main content layout with sidebar */
-.main-content {
-    display: flex;
-    gap: 20px;
-    align-items: flex-start;
-}
-
-.sequence-items-container {
+/* Homepage layout with sidebar */
+.form-section {
     flex: 1;
-    min-width: 0; /* Allow flex item to shrink below its content size */
+    min-width: 0;
 }
 
-.colors-recap-sidebar {
-    flex-shrink: 0;
-    width: 250px;
-    position: sticky;
-    top: 20px;
+/* Adjust colors-header for 3-column table */
+.colors-header .colors-header-item:first-child {
+    width: 30%;
 }
 
-/* Responsive design for main content */
-@media (max-width: 768px) {
-    .main-content {
-        flex-direction: column;
-        gap: 15px;
-    }
-    
-    .colors-recap-sidebar {
-        width: 100%;
-        position: static;
-        order: -1; /* Show colors recap above sequence items on mobile */
-    }
-    
-    .sequence-header {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-    }
-    
-    .colors-recap {
-        min-width: auto;
-        max-width: 100%;
-    }
+.colors-header .colors-header-item:nth-child(2) {
+    width: 50%;
+}
+
+.colors-header .colors-header-item:last-child {
+    width: 20%;
+}
+
+/* Style for global colors table rows */
+.global-color-row {
+    display: table-row;
+}
+
+.global-seq-item,
+.global-color-item,
+.global-count-item {
+    display: table-cell;
+    padding: 6px 8px;
+    border-bottom: 1px solid #e9ecef;
+    vertical-align: middle;
+}
+
+.global-seq-item {
+    background-color: #28a745;
+    color: white;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: bold;
+    text-align: center;
+    min-width: 20px;
+    border-right: 1px solid #e9ecef;
+}
+
+.global-color-item {
+    font-weight: bold;
+    color: #333;
+    font-size: 11px;
+    text-align: left;
+    border-right: 1px solid #e9ecef;
+}
+
+.global-count-item {
+    background-color: #007bff;
+    color: white;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: bold;
+    text-align: center;
+    min-width: 25px;
+    border-right: none;
 }
 
 .item-grid {
@@ -516,6 +535,20 @@ textarea {
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
+/* Main content layout with compact sidebar */
+.main-content {
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+}
+
+.colors-recap-sidebar {
+    flex-shrink: 0;
+    width: 200px;
+    position: sticky;
+    top: 20px;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .ub-grid, .item-grid {
@@ -543,6 +576,27 @@ textarea {
     .form-row {
         flex-direction: column; /* Stack form groups vertically */
         gap: 15px;
+    }
+    
+    .main-content {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .colors-recap-sidebar {
+        width: 100%;
+        position: static;
+        order: -1; /* Show colors recap above form on mobile */
+    }
+    
+    .colors-recap {
+        min-width: auto;
+        max-width: 100%;
+        padding: 10px;
+    }
+    
+    .colors-recap h3 {
+        font-size: 11px;
     }
 }
 

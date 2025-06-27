@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const recentItemsList = document.getElementById('recentItemsList');
 
     loadRecentItems(); 
+    loadGlobalColorsRecap(); // Add global colors recap for homepage
     setupModal(); 
 
     form.addEventListener('submit', async function(e) {
@@ -50,6 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     typeInputs.forEach(input => { input.value = ''; });
                 });
                 loadRecentItems(); 
+                loadGlobalColorsRecap(); // Refresh global colors recap 
             } else {
                 const errorMsg = result.error || 'Errore durante l\'aggiunta dell\'elemento';
                 alert(errorMsg);
@@ -282,6 +284,9 @@ async function updateItem() {
         if (typeof loadRecentItems === 'function') { 
             loadRecentItems();
         }
+        if (typeof loadGlobalColorsRecap === 'function') {
+            loadGlobalColorsRecap(); // Refresh global colors recap
+        }
         if (typeof loadSequenceItems === 'function') {
             loadSequenceItems();
         }
@@ -306,6 +311,9 @@ async function deleteItem(sequence, id) {
                 if (typeof loadRecentItems === 'function') {
                      loadRecentItems(); 
                 }
+                if (typeof loadGlobalColorsRecap === 'function') {
+                    loadGlobalColorsRecap(); // Refresh global colors recap
+                }
                  if (typeof loadSequenceItems === 'function') { // For sequence page
                     loadSequenceItems();
                 }
@@ -321,3 +329,53 @@ async function deleteItem(sequence, id) {
     }
 }
 window.deleteItem = deleteItem; // Make it global
+
+async function loadGlobalColorsRecap() {
+    try {
+        const response = await fetch('/api/get_global_colors_recap');
+        if (!response.ok) {
+            console.error("Failed to load global colors recap, status:", response.status);
+            return;
+        }
+        
+        const colorsData = await response.json();
+        const globalColorsListEl = document.getElementById('globalColorsList');
+        
+        if (!globalColorsListEl) {
+            // Not on homepage, skip
+            return;
+        }
+        
+        // Always start with the header
+        let html = `
+            <div class="colors-header">
+                <div class="colors-header-item">Sequenza</div>
+                <div class="colors-header-item">Colore</div>
+                <div class="colors-header-item">Qty</div>
+            </div>
+        `;
+        
+        if (!colorsData || colorsData.length === 0) {
+            html += `
+                <div class="colors-empty">
+                    <div>Nessun elemento presente</div>
+                </div>
+            `;
+            globalColorsListEl.innerHTML = html;
+            return;
+        }
+        
+        // Generate table rows
+        html += colorsData.map(item => `
+            <div class="global-color-row">
+                <div class="global-seq-item">${item.sequenza}</div>
+                <div class="global-color-item">${item.colore}</div>
+                <div class="global-count-item">${item.count}</div>
+            </div>
+        `).join('');
+        
+        globalColorsListEl.innerHTML = html;
+    } catch (error) {
+        console.error('Error loading global colors recap:', error);
+    }
+}

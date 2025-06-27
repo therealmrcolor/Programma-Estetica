@@ -291,6 +291,52 @@ def clear_sequence(sequence):
             
     return jsonify({"success": True})
 
+@app.route('/api/get_global_colors_recap')
+def get_global_colors_recap():
+    """Get a recap of all colors across all sequences"""
+    all_items_list = []
+    conn = sqlite3.connect('database/sequences.db')
+    c = conn.cursor()
+    
+    for i in range(1, 8):
+        try:
+            c.execute(f'SELECT * FROM sequence_{i}')
+            items_from_sequence = c.fetchall()
+            for item_row in items_from_sequence:
+                all_items_list.append(item_row_to_dict(item_row))
+        except sqlite3.Error as e:
+            print(f"Error fetching from sequence_{i}: {e}")
+            
+    conn.close()
+    
+    # Group by sequence and color, keeping track of latest timestamp
+    color_recap = {}
+    for item in all_items_list:
+        if item['colore'] and item['colore'].strip():
+            seq = item['sequenza']
+            color = item['colore'].strip().upper()
+            key = f"{seq}_{color}"
+            
+            if key not in color_recap:
+                color_recap[key] = {
+                    'sequenza': seq,
+                    'colore': color,
+                    'count': 0,
+                    'latest_timestamp': item['timestamp']
+                }
+            else:
+                # Update timestamp if this item is more recent
+                if item['timestamp'] > color_recap[key]['latest_timestamp']:
+                    color_recap[key]['latest_timestamp'] = item['timestamp']
+            
+            color_recap[key]['count'] += 1
+    
+    # Convert to list and sort by latest timestamp (most recent first)
+    result = list(color_recap.values())
+    result.sort(key=lambda x: x['latest_timestamp'], reverse=True)
+    
+    return jsonify(result)
+
 if __name__ == '__main__':
     init_db() # Initialize/update DB schema
     print("Avvio del server Waitress su http://0.0.0.0:5123")
