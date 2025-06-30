@@ -102,12 +102,28 @@ function updateColorsRecap(items) {
         return;
     }
 
-    // Count colors
+    // Count colors by occupied cells
     const colorCounts = {};
     items.forEach(item => {
         if (item.colore && item.colore.trim()) {
             const color = item.colore.trim().toUpperCase();
-            colorCounts[color] = (colorCounts[color] || 0) + 1;
+            
+            // Count occupied cells for this item
+            let occupiedCells = 0;
+            const cellTypes = ['carretti_vert', 'tavoli', 'pedane', 'contenitori', 'spalle'];
+            
+            cellTypes.forEach(cellType => {
+                if (item[cellType] && Array.isArray(item[cellType])) {
+                    item[cellType].forEach(cellValue => {
+                        if (cellValue && String(cellValue).trim()) {
+                            occupiedCells++;
+                        }
+                    });
+                }
+            });
+            
+            // Add occupied cells to the color count
+            colorCounts[color] = (colorCounts[color] || 0) + occupiedCells;
         }
     });
 
