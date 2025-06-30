@@ -369,7 +369,7 @@ async function loadGlobalColorsRecap() {
         html += colorsData.map(item => `
             <div class="global-color-row">
                 <div class="global-seq-item">${item.sequenza}</div>
-                <div class="global-color-item">${item.colore}</div>
+                <div class="global-color-item"><a href="/sequence/${item.sequenza}#color-${encodeURIComponent(item.colore)}">${item.colore}</a></div>
                 <div class="global-count-item">${item.count}</div>
             </div>
         `).join('');

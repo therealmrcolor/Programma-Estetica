@@ -157,9 +157,9 @@ def get_items(sequence):
     
     conn = sqlite3.connect('database/sequences.db')
     c = conn.cursor()
-    # Sort by reintegro ('Si' first), then by timestamp descending
+    # Sort by timestamp descending (most recent first) - consistent with homepage
     c.execute(f'''SELECT * FROM sequence_{sequence} 
-                  ORDER BY CASE reintegro WHEN 'Si' THEN 0 ELSE 1 END ASC, timestamp DESC''')
+                  ORDER BY timestamp DESC''')
     items_rows = c.fetchall()
     conn.close()
     
@@ -309,7 +309,7 @@ def get_global_colors_recap():
             
     conn.close()
     
-    # Group by sequence and color, keeping track of latest timestamp
+    # Group by sequence and color, counting occupied cells
     color_recap = {}
     for item in all_items_list:
         if item['colore'] and item['colore'].strip():
@@ -317,19 +317,28 @@ def get_global_colors_recap():
             color = item['colore'].strip().upper()
             key = f"{seq}_{color}"
             
+            # Count occupied cells for this item
+            occupied_cells = 0
+            cell_types = ['carretti_vert', 'tavoli', 'pedane', 'contenitori', 'spalle']
+            
+            for cell_type in cell_types:
+                if cell_type in item and item[cell_type]:
+                    for cell_value in item[cell_type]:
+                        if cell_value and str(cell_value).strip():  # Cell is occupied if it has a non-empty value
+                            occupied_cells += 1
+            
             if key not in color_recap:
                 color_recap[key] = {
                     'sequenza': seq,
                     'colore': color,
-                    'count': 0,
+                    'count': occupied_cells,
                     'latest_timestamp': item['timestamp']
                 }
             else:
-                # Update timestamp if this item is more recent
+                # Add cells from this item and update timestamp if more recent
+                color_recap[key]['count'] += occupied_cells
                 if item['timestamp'] > color_recap[key]['latest_timestamp']:
                     color_recap[key]['latest_timestamp'] = item['timestamp']
-            
-            color_recap[key]['count'] += 1
     
     # Convert to list and sort by latest timestamp (most recent first)
     result = list(color_recap.values())

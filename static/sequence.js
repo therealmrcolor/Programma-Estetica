@@ -31,7 +31,7 @@ async function loadSequenceItems() {
         const escapeForHtmlAttr = (jsonString) => jsonString.replace(/'/g, "'");
 
         sequenceItemsEl.innerHTML = items.map(item => `
-            <div class="sequence-item ${item.reintegro === 'Si' ? 'item-reintegro' : ''}">
+            <div id="color-${encodeURIComponent(item.colore)}" class="sequence-item ${item.reintegro === 'Si' ? 'item-reintegro' : ''}">
                 <div class="item-actions">
                     <button class="edit-btn" onclick='editItem(${escapeForHtmlAttr(JSON.stringify(item))})'>✎</button>
                     <button class="delete-btn" onclick="deleteItem(${sequenceNum}, ${item.id})">×</button>
@@ -71,6 +71,9 @@ async function loadSequenceItems() {
 
         // Update colors recap
         updateColorsRecap(items);
+        
+        // Handle URL hash to scroll to specific color
+        handleColorHash();
     } catch (error) {
         console.error('Error loading sequence items:', error);
         document.getElementById('sequenceItems').innerHTML = "<p>Errore critico nel caricamento degli elementi della sequenza.</p>";
@@ -124,7 +127,7 @@ function updateColorsRecap(items) {
     // Generate table rows
     html += sortedColors.map(color => `
         <div class="color-row">
-            <div class="color-item">${color}</div>
+            <div class="color-item"><a href="#color-${encodeURIComponent(color)}" onclick="scrollToColor('${color}')">${color}</a></div>
             <div class="color-count">${colorCounts[color]}</div>
         </div>
     `).join('');
@@ -157,3 +160,58 @@ async function clearSequence(sequence) {
     }
 }
 window.clearSequence = clearSequence; // Make global for onclick
+
+// Function to handle URL hash and scroll to specific color
+function handleColorHash() {
+    const hash = window.location.hash;
+    if (hash && hash.startsWith('#color-')) {
+        // Wait a bit for the DOM to be fully rendered
+        setTimeout(() => {
+            const targetElement = document.querySelector(hash);
+            if (targetElement) {
+                // Add a highlight effect
+                targetElement.style.transition = 'all 0.3s ease';
+                targetElement.style.boxShadow = '0 0 20px rgba(0, 123, 255, 0.5)';
+                targetElement.style.transform = 'scale(1.02)';
+                
+                // Scroll to the element with some offset
+                const yOffset = -20;
+                const y = targetElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                window.scrollTo({top: y, behavior: 'smooth'});
+                
+                // Remove highlight after a few seconds
+                setTimeout(() => {
+                    targetElement.style.boxShadow = '';
+                    targetElement.style.transform = '';
+                }, 3000);
+            }
+        }, 100);
+    }
+}
+
+// Function to scroll to a specific color in the current page
+function scrollToColor(color) {
+    const encodedColor = encodeURIComponent(color);
+    const targetElement = document.querySelector(`#color-${encodedColor}`);
+    
+    if (targetElement) {
+        // Add a highlight effect
+        targetElement.style.transition = 'all 0.3s ease';
+        targetElement.style.boxShadow = '0 0 20px rgba(0, 123, 255, 0.5)';
+        targetElement.style.transform = 'scale(1.02)';
+        
+        // Scroll to the element with some offset
+        const yOffset = -20;
+        const y = targetElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({top: y, behavior: 'smooth'});
+        
+        // Remove highlight after a few seconds
+        setTimeout(() => {
+            targetElement.style.boxShadow = '';
+            targetElement.style.transform = '';
+        }, 3000);
+    }
+    
+    // Prevent default link behavior since we're handling it manually
+    return false;
+}
