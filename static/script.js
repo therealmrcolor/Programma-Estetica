@@ -13,7 +13,8 @@ document.addEventListener('DOMContentLoaded', function() {
             colore: document.getElementById('colore').value,
             sequenza: document.getElementById('sequenza').value,
             pronto: document.getElementById('pronto').value,
-            reintegro: document.getElementById('reintegro').checked, // Get boolean value
+            reintegro: document.getElementById('reintegro').checked ? 'Si' : 'No',
+            ricambi: document.getElementById('ricambi').checked ? 'Si' : 'No',
             note: document.getElementById('note').value,
             carretti_vert: [],
             tavoli: [],
@@ -82,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const escapeForHtmlAttr = (jsonString) => jsonString.replace(/'/g, "'"); // Ensure ' is handled if stringifying JSON for onclick
 
             recentItemsList.innerHTML = items.map(item => `
-                <div class="sequence-item ${item.reintegro === 'Si' ? 'item-reintegro' : ''}">
+                <div class="sequence-item ${item.reintegro === 'Si' ? 'item-reintegro' : ''} ${item.ricambi === 'Si' ? 'item-ricambi' : ''}">
                     <div class="item-actions">
                         <button class="edit-btn" onclick='editItem(${escapeForHtmlAttr(JSON.stringify(item))})'>✎</button>
                         <button class="delete-btn" onclick="deleteItem(${item.sequenza}, ${item.id})">×</button>
@@ -92,6 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <span><span class="info-label">Colore:</span> <span class="info-value">${item.colore}</span></span>
                         <span><span class="info-label">Pronto:</span> <span class="info-value">${item.pronto}</span></span>
                         ${item.reintegro === 'Si' ? '<span class="reintegro-badge">REINTEGRO</span>' : ''}
+                        ${item.ricambi === 'Si' ? '<span class="ricambi-badge">RICAMBI</span>' : ''}
                     </div>
                     <div class="item-grid">
                         <div class="row-header"></div>
@@ -167,6 +169,7 @@ function editItem(item) {
     document.getElementById('editColore').value = item.colore;
     document.getElementById('editPronto').value = item.pronto;
     document.getElementById('editReintegro').checked = (item.reintegro === 'Si'); // Set checkbox state
+    document.getElementById('editRicambi').checked = (item.ricambi === 'Si'); // Set checkbox state
     document.getElementById('editNote').value = item.note || '';
 
     const editFormGrid = document.querySelector('#editForm .ub-grid');
@@ -203,7 +206,8 @@ async function updateItem() {
     const formData = {
         colore: document.getElementById('editColore').value,
         pronto: document.getElementById('editPronto').value,
-        reintegro: document.getElementById('editReintegro').checked, // Get boolean value
+        reintegro: document.getElementById('editReintegro').checked ? 'Si' : 'No',
+        ricambi: document.getElementById('editRicambi').checked ? 'Si' : 'No',
         note: document.getElementById('editNote').value,
         carretti_vert: [],
         tavoli: [],

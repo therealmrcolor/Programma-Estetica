@@ -31,7 +31,7 @@ async function loadSequenceItems() {
         const escapeForHtmlAttr = (jsonString) => jsonString.replace(/'/g, "'");
 
         sequenceItemsEl.innerHTML = items.map(item => `
-            <div id="color-${encodeURIComponent(item.colore)}" class="sequence-item ${item.reintegro === 'Si' ? 'item-reintegro' : ''}">
+            <div id="color-${encodeURIComponent(item.colore)}" class="sequence-item ${item.reintegro === 'Si' ? 'item-reintegro' : ''} ${item.ricambi === 'Si' ? 'item-ricambi' : ''}">
                 <div class="item-actions">
                     <button class="edit-btn" onclick='editItem(${escapeForHtmlAttr(JSON.stringify(item))})'>✎</button>
                     <button class="delete-btn" onclick="deleteItem(${sequenceNum}, ${item.id})">×</button>
@@ -40,6 +40,7 @@ async function loadSequenceItems() {
                     <span><span class="info-label">Colore:</span> <span class="info-value">${item.colore}</span></span>
                     <span><span class="info-label">Pronto:</span> <span class="info-value">${item.pronto}</span></span>
                     ${item.reintegro === 'Si' ? '<span class="reintegro-badge">REINTEGRO</span>' : ''}
+                    ${item.ricambi === 'Si' ? '<span class="ricambi-badge">RICAMBI</span>' : ''}
                 </div>
                 <div class="item-grid">
                     <div class="row-header"></div>

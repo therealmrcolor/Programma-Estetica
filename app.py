@@ -10,21 +10,39 @@ def adapt_datetime(ts):
     return ts.isoformat()
 
 def item_row_to_dict(item_row):
-    # Account for the new 'reintegro' column before 'timestamp'
-    return {
-        'id': item_row[0],
-        'colore': item_row[1],
-        'sequenza': item_row[2],
-        'pronto': item_row[3],
-        'reintegro': item_row[4], # New field
-        'note': item_row[5],
-        'carretti_vert': [item_row[6], item_row[7], item_row[8], item_row[9], item_row[10]],
-        'tavoli': [item_row[11], item_row[12], item_row[13], item_row[14], item_row[15]],
-        'pedane': [item_row[16], item_row[17], item_row[18], item_row[19], item_row[20]],
-        'contenitori': [item_row[21], item_row[22], item_row[23], item_row[24], item_row[25]],
-        'spalle': [item_row[26], item_row[27], item_row[28], item_row[29], item_row[30]],
-        'timestamp': item_row[31] # Index shifted
-    }
+    # Handle both old format (without ricambi) and new format (with ricambi)
+    if len(item_row) == 32:  # Old format without ricambi
+        return {
+            'id': item_row[0],
+            'colore': item_row[1],
+            'sequenza': item_row[2],
+            'pronto': item_row[3],
+            'reintegro': item_row[4],
+            'ricambi': 'No',  # Default value for old records
+            'note': item_row[5],
+            'carretti_vert': [item_row[6], item_row[7], item_row[8], item_row[9], item_row[10]],
+            'tavoli': [item_row[11], item_row[12], item_row[13], item_row[14], item_row[15]],
+            'pedane': [item_row[16], item_row[17], item_row[18], item_row[19], item_row[20]],
+            'contenitori': [item_row[21], item_row[22], item_row[23], item_row[24], item_row[25]],
+            'spalle': [item_row[26], item_row[27], item_row[28], item_row[29], item_row[30]],
+            'timestamp': item_row[31]
+        }
+    else:  # New format with ricambi (33 fields)
+        return {
+            'id': item_row[0],
+            'colore': item_row[1],
+            'sequenza': item_row[2],
+            'pronto': item_row[3],
+            'reintegro': item_row[4],
+            'ricambi': item_row[32] if item_row[32] else 'No',  # ricambi is the last field
+            'note': item_row[5],
+            'carretti_vert': [item_row[6], item_row[7], item_row[8], item_row[9], item_row[10]],
+            'tavoli': [item_row[11], item_row[12], item_row[13], item_row[14], item_row[15]],
+            'pedane': [item_row[16], item_row[17], item_row[18], item_row[19], item_row[20]],
+            'contenitori': [item_row[21], item_row[22], item_row[23], item_row[24], item_row[25]],
+            'spalle': [item_row[26], item_row[27], item_row[28], item_row[29], item_row[30]],
+            'timestamp': item_row[31]  # timestamp remains at index 31
+        }
 
 def init_db():
     db_dir = 'database'
@@ -38,6 +56,7 @@ def init_db():
     c = conn.cursor()
     
     for i in range(1, 8):
+        # Create table with all columns
         c.execute(f'''
         CREATE TABLE IF NOT EXISTS sequence_{i} (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -45,6 +64,7 @@ def init_db():
             sequenza TEXT,
             pronto TEXT,
             reintegro TEXT, -- Added reintegro field
+            ricambi TEXT, -- Added ricambi field
             note TEXT,
             carretti_vert_1 TEXT, 
             carretti_vert_2 TEXT,
@@ -74,6 +94,23 @@ def init_db():
             timestamp DATETIME
         )
         ''')
+        
+        # Add ricambi column to existing tables if it doesn't exist
+        try:
+            c.execute(f'ALTER TABLE sequence_{i} ADD COLUMN ricambi TEXT DEFAULT "No"')
+            print(f"Added ricambi column to sequence_{i}")
+        except sqlite3.OperationalError as e:
+            if "duplicate column name" not in str(e).lower():
+                print(f"Error adding ricambi column to sequence_{i}: {e}")
+            # Column already exists, ignore
+            pass
+            
+        # Update existing NULL or empty ricambi values to "No"
+        try:
+            c.execute(f'UPDATE sequence_{i} SET ricambi = "No" WHERE ricambi IS NULL OR ricambi = ""')
+            print(f"Updated NULL/empty ricambi values in sequence_{i}")
+        except sqlite3.OperationalError as e:
+            print(f"Error updating ricambi values in sequence_{i}: {e}")
     
     conn.commit()
     conn.close()
@@ -104,7 +141,7 @@ def add_item():
     except (ValueError, TypeError):
         return jsonify({"success": False, "error": "Sequence number must be a valid integer string"}), 400
 
-    required_fields = ['colore', 'pronto'] # reintegro will be handled as boolean
+    required_fields = ['colore', 'pronto'] # reintegro and ricambi will be handled as boolean
     for field in required_fields:
         if field not in data or data[field] is None:
             return jsonify({"success": False, "error": f"Missing required field: {field}"}), 400
@@ -118,9 +155,10 @@ def add_item():
     c = conn.cursor()
     
     reintegro_val = "Si" if data.get('reintegro', False) else "No" # Handles boolean from checkbox
+    ricambi_val = "Si" if data.get('ricambi', False) else "No" # Handles boolean from checkbox
 
-    columns = ['colore', 'sequenza', 'pronto', 'reintegro', 'note']
-    values = [data['colore'], data['sequenza'], data['pronto'], reintegro_val, data.get('note', '')]
+    columns = ['colore', 'sequenza', 'pronto', 'reintegro', 'ricambi', 'note']
+    values = [data['colore'], data['sequenza'], data['pronto'], reintegro_val, ricambi_val, data.get('note', '')]
     
     for item_type in expected_arrays:
         for i in range(5):
@@ -211,7 +249,7 @@ def update_item(sequence, item_id):
         return jsonify({"success": False, "error": "Invalid sequence number"}), 400
     
     data = request.json
-    # 'reintegro' is now expected from the form
+    # 'reintegro' and 'ricambi' are now expected from the form
     required_fields = ['colore', 'pronto'] 
     for field in required_fields:
         if field not in data or data[field] is None:
@@ -226,9 +264,10 @@ def update_item(sequence, item_id):
     c = conn.cursor()
     
     reintegro_val = "Si" if data.get('reintegro', False) else "No"
+    ricambi_val = "Si" if data.get('ricambi', False) else "No"
 
-    columns_to_update = ['colore', 'pronto', 'reintegro', 'note']
-    update_values = [data['colore'], data['pronto'], reintegro_val, data.get('note','')]
+    columns_to_update = ['colore', 'pronto', 'reintegro', 'ricambi', 'note']
+    update_values = [data['colore'], data['pronto'], reintegro_val, ricambi_val, data.get('note','')]
     
     for item_type in expected_arrays:
         for i in range(5):

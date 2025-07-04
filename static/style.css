@@ -60,7 +60,7 @@ nav {
 .form-group-reintegro {
     display: flex;
     align-items: center; /* Vertically align checkbox and label */
-    flex-basis: 100%; /* Make it take full width initially or as needed */
+    flex-basis: 48%; /* Take about half width to allow side by side */
     margin-top: 10px;
     margin-bottom: 10px;
 }
@@ -74,6 +74,27 @@ nav {
 .reintegro-label {
     font-weight: bold;
     color: #d9534f; /* Red color for attention */
+    cursor: pointer;
+}
+
+/* Style for the Ricambi checkbox and label */
+.form-group-ricambi {
+    display: flex;
+    align-items: center; /* Vertically align checkbox and label */
+    flex-basis: 48%; /* Take about half width to allow side by side */
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.form-group-ricambi input[type="checkbox"] {
+    margin-right: 8px;
+    width: auto; /* Override default input width */
+    transform: scale(1.3); /* Make checkbox slightly larger */
+}
+
+.ricambi-label {
+    font-weight: bold;
+    color: #f0ad4e; /* Orange/yellow color for attention */
     cursor: pointer;
 }
 
@@ -169,8 +190,30 @@ textarea {
     background-color: #fef0f0; /* Light red background */
 }
 
+/* Style for items marked as 'ricambi' */
+.item-ricambi {
+    border-left: 5px solid #f0ad4e; /* Orange left border */
+    background-color: #fefbf0; /* Light yellow background */
+}
+
+/* Style for items marked as both 'reintegro' and 'ricambi' */
+.item-reintegro.item-ricambi {
+    border-left: 5px solid #d9534f; /* Keep red as priority */
+    background: linear-gradient(135deg, #fef0f0 50%, #fefbf0 50%); /* Diagonal split background */
+}
+
 .reintegro-badge {
     background-color: #d9534f;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 0.8em;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.ricambi-badge {
+    background-color: #f0ad4e;
     color: white;
     padding: 3px 8px;
     border-radius: 10px;
