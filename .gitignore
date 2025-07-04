@@ -3,6 +3,11 @@
 *.tar.gz
 *.tar.bz2
 
+# macOS files
+.DS_Store
+Icon
+Icon?
+
 # File Python
 __pycache__/
 *.py[cod]
@@ -41,5 +46,4 @@ venv.bak/
 *.swo
 
 # OS
-.DS_Store
 Thumbs.db
