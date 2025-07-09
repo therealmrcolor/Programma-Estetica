@@ -383,3 +383,71 @@ async function loadGlobalColorsRecap() {
         console.error('Error loading global colors recap:', error);
     }
 }
+
+// Funzione per copiare i colori nella clipboard
+async function copyColorsToClipboard() {
+    const copyBtn = document.getElementById('copyColorsBtn');
+    
+    try {
+        copyBtn.disabled = true;
+        copyBtn.textContent = '📋 Copiando...';
+        
+        let colors = [];
+        
+        // Controlla se siamo nella homepage (globalColorsList) o in una pagina sequenza (colorsList)
+        const globalColorsEl = document.getElementById('globalColorsList');
+        const sequenceColorsEl = document.getElementById('colorsList');
+        
+        if (globalColorsEl && globalColorsEl.style.display !== 'none') {
+            // Homepage - estrai colori dal recap globale
+            const colorRows = globalColorsEl.querySelectorAll('.global-color-row');
+            colorRows.forEach(row => {
+                const colorElement = row.querySelector('.global-color-item');
+                if (colorElement) {
+                    const colorText = colorElement.textContent.trim();
+                    if (colorText && !colors.includes(colorText)) {
+                        colors.push(colorText);
+                    }
+                }
+            });
+        } else if (sequenceColorsEl) {
+            // Pagina sequenza - estrai colori dal recap della sequenza
+            const colorRows = sequenceColorsEl.querySelectorAll('.color-row');
+            colorRows.forEach(row => {
+                const colorElement = row.querySelector('.color-item');
+                if (colorElement) {
+                    const colorText = colorElement.textContent.trim();
+                    if (colorText && !colors.includes(colorText)) {
+                        colors.push(colorText);
+                    }
+                }
+            });
+        }
+        
+        if (colors.length === 0) {
+            throw new Error('Nessun colore da copiare');
+        }
+        
+        // Copia nella clipboard
+        const colorsText = colors.join('\n');
+        await navigator.clipboard.writeText(colorsText);
+        
+        // Feedback visuale
+        copyBtn.textContent = '✅ Copiato!';
+        setTimeout(() => {
+            copyBtn.textContent = '📋 Copia Colori';
+            copyBtn.disabled = false;
+        }, 2000);
+        
+    } catch (error) {
+        console.error('Errore durante la copia:', error);
+        copyBtn.textContent = '❌ Errore';
+        setTimeout(() => {
+            copyBtn.textContent = '📋 Copia Colori';
+            copyBtn.disabled = false;
+        }, 2000);
+    }
+}
+
+// Rende la funzione globale per l'uso negli onclick HTML
+window.copyColorsToClipboard = copyColorsToClipboard;

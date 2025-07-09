@@ -21,6 +21,26 @@
     <div class="container">
         <h1>Inserimento Dati</h1>
         
+        <!-- Recap colori globale spostato in alto -->
+        <div class="colors-recap-main">
+            <div class="colors-recap">
+                <div class="colors-header-with-button">
+                    <h3>Recap colori globale</h3>
+                    <button id="copyColorsBtn" class="copy-colors-btn" onclick="copyColorsToClipboard()">📋 Copia Colori</button>
+                </div>
+                <div id="globalColorsList" class="colors-list">
+                    <div class="colors-header">
+                        <div class="colors-header-item">Sequenza</div>
+                        <div class="colors-header-item">Colore</div>
+                        <div class="colors-header-item">Qty</div>
+                    </div>
+                    <div class="colors-empty">
+                        <div colspan="3">Nessun elemento presente</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="main-content">
             <div class="form-section">
                 <form id="dataForm" class="data-form">
@@ -112,22 +132,6 @@
 
             <button type="submit" class="submit-btn">Aggiungi</button>
         </form>
-            </div>
-            
-            <div class="colors-recap-sidebar">
-                <div class="colors-recap">
-                    <h3>Recap colori globale</h3>
-                    <div id="globalColorsList" class="colors-list">
-                        <div class="colors-header">
-                            <div class="colors-header-item">Sequenza</div>
-                            <div class="colors-header-item">Colore</div>
-                            <div class="colors-header-item">Qty</div>
-                        </div>
-                        <div class="colors-empty">
-                            <div colspan="3">Nessun elemento presente</div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
 

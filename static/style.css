@@ -641,6 +641,65 @@ textarea {
     top: 20px;
 }
 
+/* New CSS for full-width colors recap */
+.colors-recap-main {
+    width: 100%;
+    margin-bottom: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.colors-recap-main .colors-recap {
+    padding: 20px;
+    width: 100%;
+    max-width: none;
+}
+
+.colors-recap-main .colors-list {
+    width: 100%;
+}
+
+/* Header con pulsante per la sezione colori */
+.colors-header-with-button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.colors-header-with-button h3 {
+    margin: 0;
+}
+
+/* Stile per il pulsante copia colori */
+.copy-colors-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.copy-colors-btn:hover {
+    background-color: #0056b3;
+}
+
+.copy-colors-btn:active {
+    transform: translateY(1px);
+}
+
+.copy-colors-btn:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .ub-grid, .item-grid {
