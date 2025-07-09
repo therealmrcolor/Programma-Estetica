@@ -9,8 +9,14 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
         
+        // Gestione automatica del prefisso RAL per codici di 4 cifre
+        let coloreValue = document.getElementById('colore').value.trim();
+        if (/^\d{4}$/.test(coloreValue)) {
+            coloreValue = 'RAL' + coloreValue;
+        }
+        
         const formData = {
-            colore: document.getElementById('colore').value,
+            colore: coloreValue,
             sequenza: document.getElementById('sequenza').value,
             pronto: document.getElementById('pronto').value,
             reintegro: document.getElementById('reintegro').checked ? 'Si' : 'No',
@@ -203,8 +209,14 @@ async function updateItem() {
         return;
     }
 
+    // Gestione automatica del prefisso RAL per codici di 4 cifre nel form di modifica
+    let editColoreValue = document.getElementById('editColore').value.trim();
+    if (/^\d{4}$/.test(editColoreValue)) {
+        editColoreValue = 'RAL' + editColoreValue;
+    }
+
     const formData = {
-        colore: document.getElementById('editColore').value,
+        colore: editColoreValue,
         pronto: document.getElementById('editPronto').value,
         reintegro: document.getElementById('editReintegro').checked ? 'Si' : 'No',
         ricambi: document.getElementById('editRicambi').checked ? 'Si' : 'No',

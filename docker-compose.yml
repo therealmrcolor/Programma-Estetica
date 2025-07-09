@@ -1,0 +1,17 @@
+services:
+  programma_estetica:
+    build: .
+    container_name: programma_estetica
+    ports:
+      - "5123:5123"
+    volumes:
+      - ./database:/app/database
+    restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:5123')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s

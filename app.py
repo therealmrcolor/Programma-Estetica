@@ -154,8 +154,8 @@ def add_item():
     conn = sqlite3.connect('database/sequences.db')
     c = conn.cursor()
     
-    reintegro_val = "Si" if data.get('reintegro', False) else "No" # Handles boolean from checkbox
-    ricambi_val = "Si" if data.get('ricambi', False) else "No" # Handles boolean from checkbox
+    reintegro_val = "Si" if data.get('reintegro') == 'Si' else "No"
+    ricambi_val = "Si" if data.get('ricambi') == 'Si' else "No"
 
     columns = ['colore', 'sequenza', 'pronto', 'reintegro', 'ricambi', 'note']
     values = [data['colore'], data['sequenza'], data['pronto'], reintegro_val, ricambi_val, data.get('note', '')]
@@ -263,8 +263,8 @@ def update_item(sequence, item_id):
     conn = sqlite3.connect('database/sequences.db')
     c = conn.cursor()
     
-    reintegro_val = "Si" if data.get('reintegro', False) else "No"
-    ricambi_val = "Si" if data.get('ricambi', False) else "No"
+    reintegro_val = "Si" if data.get('reintegro') == 'Si' else "No"
+    ricambi_val = "Si" if data.get('ricambi') == 'Si' else "No"
 
     columns_to_update = ['colore', 'pronto', 'reintegro', 'ricambi', 'note']
     update_values = [data['colore'], data['pronto'], reintegro_val, ricambi_val, data.get('note','')]

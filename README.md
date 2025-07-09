@@ -6,9 +6,10 @@ Un'applicazione web per la gestione di sequenze di produzione con database SQLit
 
 ### Prerequisiti
 - Docker Desktop installato e funzionante
+- Docker Compose incluso (viene installato automaticamente con Docker Desktop)
 - Porta 5123 disponibile sul sistema
 
-### Istruzioni per l'avvio
+### ⭐ Metodo raccomandato: Docker Compose
 
 #### 1. Clona o scarica il progetto
 ```bash
@@ -16,21 +17,61 @@ git clone <repository-url>
 cd "Programma singore"
 ```
 
-#### 2. Costruisci l'immagine Docker
+#### 2. Avvia con Docker Compose (metodo più semplice)
+```bash
+docker-compose up -d
+```
+
+#### 3. Accedi all'applicazione
+- **Locale**: http://localhost:5123
+- **Da altri PC nella rete**: http://[IP_DEL_TUO_PC]:5123
+
+### 🔄 Comandi Docker Compose
+
+#### Avvia l'applicazione in background
+```bash
+docker-compose up -d
+```
+
+#### Ferma l'applicazione
+```bash
+docker-compose down
+```
+
+#### Visualizza i log
+```bash
+docker-compose logs programma_estetica
+```
+
+#### Riavvia l'applicazione
+```bash
+docker-compose restart
+```
+
+#### Ricostruisci e riavvia (dopo modifiche al codice)
+```bash
+docker-compose down
+docker-compose up -d --build
+```
+
+#### Visualizza stato dei container
+```bash
+docker-compose ps
+```
+
+### 🛠️ Metodo alternativo: Docker classico
+
+#### 1. Costruisci l'immagine Docker
 ```bash
 docker build -t flaskapp_image .
 ```
 
-#### 3. Avvia il container
+#### 2. Avvia il container
 ```bash
 docker run -d -p 5123:5123 --name flaskapp_container flaskapp_image
 ```
 
-#### 4. Accedi all'applicazione
-- **Locale**: http://localhost:5123
-- **Da altri PC nella rete**: http://[IP_DEL_TUO_PC]:5123
-
-### Comandi utili Docker
+### Comandi utili Docker classico
 
 #### Verifica se il container è in esecuzione
 ```bash
@@ -86,6 +127,7 @@ docker run -d -p 5123:5123 --name flaskapp_container flaskapp_image
 #### Il container non si avvia
 - Verifica che Docker Desktop sia in esecuzione
 - Controlla che la porta 5123 non sia già in uso: `netstat -an | grep 5123`
+- Con Docker Compose: `docker-compose logs programma_estetica` per vedere gli errori
 
 #### Non riesco ad accedere da altri PC
 - Verifica che il firewall permetta connessioni sulla porta 5123
@@ -93,7 +135,8 @@ docker run -d -p 5123:5123 --name flaskapp_container flaskapp_image
 - Su Windows, controlla le impostazioni di rete nelle opzioni di Docker Desktop
 
 #### Modifiche al codice non si riflettono
-- Devi ricostruire l'immagine Docker con il comando di ricostruzione completa sopra
+- Con Docker Compose: `docker-compose down && docker-compose up -d --build`
+- Con Docker classico: usa il comando di ricostruzione completa sopra
 
 ### 📁 Struttura del progetto
 
@@ -101,6 +144,7 @@ docker run -d -p 5123:5123 --name flaskapp_container flaskapp_image
 Programma singore/
 ├── app.py                 # Server Flask principale
 ├── Dockerfile            # Configurazione Docker
+├── docker-compose.yml    # Configurazione Docker Compose
 ├── requirements.txt      # Dipendenze Python
 ├── database/             # Database SQLite (creato automaticamente)
 ├── static/              # File CSS e JavaScript
@@ -118,7 +162,10 @@ Programma singore/
 - **Gestione sequenze**: 7 sequenze separate (SEQ 1-7)
 - **Modifica elementi**: Possibilità di modificare tutti i campi, incluso il numero di sequenza
 - **Eliminazione**: Rimozione singola o svuotamento completo sequenze
-- **Ordinamento**: Gli elementi con "REINTEGRO" appaiono sempre per primi
+- **Funzionalità speciali**: 
+  - Checkbox "Reintegro" e "Ricambi" con badge colorati
+  - Ordinamento automatico: elementi con badge appaiono sempre per primi
+  - Gestione colori RAL con auto-prefisso per codici a 4 cifre
 - **Responsive**: Interfaccia ottimizzata per desktop e dispositivi mobili
 
 ### 🏗️ Tecnologie utilizzate
@@ -130,4 +177,7 @@ Programma singore/
 
 ---
 
-**Nota**: Il database viene creato automaticamente al primo avvio e i dati persistono finché il container non viene rimosso.
+**Note**: 
+- Il database viene creato automaticamente al primo avvio e i dati persistono grazie al volume Docker
+- Con Docker Compose, il container si chiama `programma_estetica`
+- Raccomandato l'uso di Docker Compose per la gestione semplificata

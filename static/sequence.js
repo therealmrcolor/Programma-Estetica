@@ -103,8 +103,9 @@ function updateColorsRecap(items) {
         return;
     }
 
-    // Count colors by occupied cells
+    // Count colors by occupied cells and track latest timestamp for each color
     const colorCounts = {};
+    const colorTimestamps = {};
     items.forEach(item => {
         if (item.colore && item.colore.trim()) {
             const color = item.colore.trim().toUpperCase();
@@ -125,11 +126,24 @@ function updateColorsRecap(items) {
             
             // Add occupied cells to the color count
             colorCounts[color] = (colorCounts[color] || 0) + occupiedCells;
+            
+            // Track the latest timestamp for this color
+            const itemTimestamp = new Date(item.timestamp).getTime();
+            if (!colorTimestamps[color] || itemTimestamp > colorTimestamps[color]) {
+                colorTimestamps[color] = itemTimestamp;
+            }
         }
     });
 
-    // Sort colors alphabetically
-    const sortedColors = Object.keys(colorCounts).sort();
+    // Sort colors by latest timestamp (most recent first), then alphabetically as fallback
+    const sortedColors = Object.keys(colorCounts).sort((a, b) => {
+        const timestampA = colorTimestamps[a] || 0;
+        const timestampB = colorTimestamps[b] || 0;
+        if (timestampA !== timestampB) {
+            return timestampB - timestampA; // Most recent first
+        }
+        return a.localeCompare(b); // Alphabetical fallback
+    });
 
     if (sortedColors.length === 0) {
         html += `
