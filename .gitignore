@@ -7,6 +7,8 @@
 .DS_Store
 Icon
 Icon?
+**/Icon
+**/Icon?
 
 # File Python
 __pycache__/
