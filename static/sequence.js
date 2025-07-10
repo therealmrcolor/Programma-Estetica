@@ -42,6 +42,27 @@ async function loadSequenceItems() {
                     ${item.reintegro === 'Si' ? '<span class="reintegro-badge">REINTEGRO</span>' : ''}
                     ${item.ricambi === 'Si' ? '<span class="ricambi-badge">RICAMBI</span>' : ''}
                 </div>
+                ${item.painting_list && item.painting_list.trim() ? 
+                    `<div class="painting-list-preview-static">
+                        <span class="info-label">Painting List (${item.painting_list.split('\n').filter(c => c.trim()).length} codici):</span>
+                        <div class="painting-codes-table-static">
+                            <table>
+                                <tbody>
+                                    ${item.painting_list.split('\n')
+                                        .filter(code => code.trim())
+                                        .map((code, index) => 
+                                            `<tr>
+                                                <td>${index + 1}</td>
+                                                <td>${code.trim()}</td>
+                                            </tr>`
+                                        ).join('')
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>` 
+                    : ''
+                }
                 <div class="item-grid">
                     <div class="row-header"></div>
                     <div class="ub-header">UB 1</div>
@@ -296,6 +317,20 @@ async function copyColorsToClipboard() {
         }, 2000);
     }
 }
+
+// Funzione per mostrare/nascondere i codici della painting list
+function togglePaintingList(button) {
+    const codesTable = button.closest('.painting-list-preview').querySelector('.painting-codes-table');
+    if (codesTable.classList.contains('hidden')) {
+        codesTable.classList.remove('hidden');
+        button.textContent = 'Nascondi';
+    } else {
+        codesTable.classList.add('hidden');
+        button.textContent = 'Mostra';
+    }
+}
+
+window.togglePaintingList = togglePaintingList;
 
 // Rende la funzione globale per l'uso negli onclick HTML
 window.copyColorsToClipboard = copyColorsToClipboard;

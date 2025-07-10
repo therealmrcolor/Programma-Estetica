@@ -507,8 +507,10 @@ textarea {
     color: #333;
 }
 
-.item-info > span:not(:last-child) {
+.item-info > span {
     margin-right: 15px; /* Space between info elements */
+    display: inline-block;
+    vertical-align: middle;
 }
 
 
@@ -534,6 +536,46 @@ textarea {
     margin-top: 10px;
     text-align: right;
 }
+
+.painting-list-preview-static {
+    margin-top: 10px;
+    font-size: 0.9em;
+}
+
+.painting-list-preview-static .info-label {
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.painting-codes-table-static {
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    background-color: #fdfdfd;
+}
+
+.painting-codes-table-static table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.painting-codes-table-static td {
+    padding: 4px 8px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.painting-codes-table-static tr:last-child td {
+    border-bottom: none;
+}
+
+.painting-codes-table-static tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
 
 .modal {
     display: none;
@@ -700,6 +742,76 @@ textarea {
     cursor: not-allowed;
 }
 
+/* Painting List Preview in Sequence page */
+.painting-list-preview {
+    margin-top: 10px;
+    border-top: 1px dashed #ddd;
+    padding-top: 8px;
+    width: 100%;
+}
+
+.painting-list-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.painting-codes-table {
+    width: 100%;
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    margin-top: 5px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.painting-codes-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.painting-codes-table th, 
+.painting-codes-table td {
+    padding: 6px 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.painting-codes-table th {
+    background-color: #f0f0f0;
+    font-weight: 600;
+}
+
+.painting-codes-table th:first-child {
+    width: 50px;
+}
+
+.painting-codes-table tbody tr:hover {
+    background-color: #f0f8ff;
+}
+
+.painting-codes-table.hidden {
+    display: none;
+}
+
+.show-codes-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.show-codes-btn:hover {
+    background-color: #0056b3;
+}
+/* End Painting List Preview in Sequence page */
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .ub-grid, .item-grid {
@@ -799,3 +911,129 @@ textarea {
 .color-item a:active {
     background-color: #0056b3;
 }
+
+/* Painting List styles */
+.painting-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+
+.painting-list-input-wrapper {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.painting-list-container textarea,
+.painting-list-container input[type="text"] {
+    flex-grow: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+.clear-btn {
+    padding: 8px 12px;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    height: auto;
+    align-self: flex-start;
+}
+
+.clear-btn:hover {
+    background-color: #d32f2f;
+}
+
+.painting-list-info {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 5px;
+    display: flex;
+    justify-content: flex-start; /* Allineato a sinistra */
+    align-items: center;
+}
+
+.show-btn {
+    padding: 5px 10px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.show-btn:hover {
+    background-color: #388e3c;
+}
+
+.scanned-codes-table {
+    width: 100%;
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    margin-top: 5px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.scanned-codes-table.hidden {
+    display: block; /* Rimosso display: none per rendere sempre visibile */
+}
+
+.scanned-codes-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.scanned-codes-table th, 
+.scanned-codes-table td {
+    padding: 6px 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.scanned-codes-table th {
+    background-color: #f0f0f0;
+    font-weight: 600;
+}
+
+.scanned-codes-table th:first-child {
+    width: 50px;
+}
+
+.scanned-codes-table th:last-child {
+    width: 80px;
+}
+
+.scanned-codes-table tbody tr:hover {
+    background-color: #f0f8ff;
+}
+
+.scanned-codes-table.hidden {
+    display: table;
+}
+
+.remove-code-btn {
+    padding: 3px 8px;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.75rem;
+}
+
+.remove-code-btn:hover {
+    background-color: #d32f2f;
+}
+
+/* End Painting List styles */

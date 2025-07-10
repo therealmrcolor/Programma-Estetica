@@ -4,8 +4,133 @@ document.addEventListener('DOMContentLoaded', function() {
 
     loadRecentItems(); 
     loadGlobalColorsRecap(); // Add global colors recap for homepage
-    setupModal(); 
+    setupModal();
+    setupPaintingList(); // Setup Painting List functionality
 
+    // Funzione per gestire la Painting List
+    function setupPaintingList() {
+        // Main form
+        setupPaintingListForForm(
+            'painting_list_scanner', 
+            'painting_list', 
+            'scannedCodesBody', 
+            'paintingListCount', 
+            'clearPaintingList',
+            'togglePaintingList',
+            'paintingListContainer'
+        );
+
+        // Edit modal
+        setupPaintingListForForm(
+            'editPaintingListScanner', 
+            'editPaintingList', 
+            'editScannedCodesBody', 
+            'editPaintingListCount', 
+            'editClearPaintingList',
+            'editTogglePaintingList',
+            'editPaintingListContainer'
+        );
+    }
+
+    function setupPaintingListForForm(scannerId, hiddenInputId, tableBodyId, countId, clearBtnId, toggleBtnId, containerId) {
+        const scannerInput = document.getElementById(scannerId);
+        const hiddenInput = document.getElementById(hiddenInputId);
+        const tableBody = document.getElementById(tableBodyId);
+        const countElement = document.getElementById(countId);
+        const clearBtn = document.getElementById(clearBtnId);
+        const toggleBtn = document.getElementById(toggleBtnId);
+        const container = document.getElementById(containerId);
+
+        if (!scannerInput) return; // Element might not be on the page (e.g. sequence.html)
+
+        scannerInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Evita il submit del form
+                const code = scannerInput.value.trim();
+                if (code) {
+                    addCodeToPaintingList(code, hiddenInput, tableBody, countElement);
+                    scannerInput.value = '';
+                }
+            }
+        });
+
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function() {
+                hiddenInput.value = '';
+                updateScannedCodesTable(hiddenInput, tableBody, countElement);
+            });
+        }
+
+        if (toggleBtn && container) {
+            toggleBtn.addEventListener('click', function() {
+                const isVisible = container.style.display === 'block';
+                container.style.display = isVisible ? 'none' : 'block';
+                toggleBtn.textContent = isVisible ? 'Mostra' : 'Nascondi';
+            });
+        }
+    }
+
+    function addCodeToPaintingList(code, hiddenInput, tableBody, countElement) {
+        const currentCodes = hiddenInput.value ? hiddenInput.value.split('\n') : [];
+        // Evita duplicati
+        if (!currentCodes.includes(code)) { 
+            currentCodes.push(code);
+            hiddenInput.value = currentCodes.join('\n');
+            updateScannedCodesTable(hiddenInput, tableBody, countElement);
+        }
+    }
+    
+    function removeCodeFromPaintingList(index, hiddenInput, tableBody, countElement) {
+        const lines = hiddenInput.value.split('\n');
+        lines.splice(index, 1);
+        hiddenInput.value = lines.join('\n');
+        updateScannedCodesTable(hiddenInput, tableBody, countElement);
+    }
+
+    // Funzione per aggiornare la tabella dei codici scansionati
+    function updateScannedCodesTable(hiddenInput, tableBody, countElement) {
+        const lines = hiddenInput.value.trim() ? hiddenInput.value.split('\n').filter(line => line.trim()) : [];
+        
+        // Pulisce la tabella
+        if (!tableBody) return;
+        tableBody.innerHTML = '';
+        
+        // Aggiunge le righe per ogni codice
+        lines.forEach((code, index) => {
+            if (!code.trim()) return;
+            
+            const tr = document.createElement('tr');
+            
+            // Cella per il numero
+            const tdNum = document.createElement('td');
+            tdNum.textContent = index + 1;
+            tr.appendChild(tdNum);
+            
+            // Cella per il codice
+            const tdCode = document.createElement('td');
+            tdCode.textContent = code.trim();
+            tr.appendChild(tdCode);
+            
+            // Cella per il pulsante di rimozione
+            const tdAction = document.createElement('td');
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-code-btn';
+            removeBtn.textContent = 'Rimuovi';
+            removeBtn.addEventListener('click', function() {
+                removeCodeFromPaintingList(index, hiddenInput, tableBody, countElement);
+            });
+            
+            tdAction.appendChild(removeBtn);
+            tr.appendChild(tdAction);
+            
+            tableBody.appendChild(tr);
+        });
+
+        if (countElement) {
+            countElement.textContent = lines.length;
+        }
+    }
+    
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
         
@@ -22,11 +147,13 @@ document.addEventListener('DOMContentLoaded', function() {
             reintegro: document.getElementById('reintegro').checked ? 'Si' : 'No',
             ricambi: document.getElementById('ricambi').checked ? 'Si' : 'No',
             note: document.getElementById('note').value,
+            painting_list: document.getElementById('painting_list').value,
             carretti_vert: [],
             tavoli: [],
             pedane: [],
             contenitori: [],
-            spalle: []
+            spalle: [],
+            painting_list: document.getElementById('painting_list').value.trim()
         };
 
         const grid = document.querySelector('#dataForm .ub-grid'); 
@@ -57,6 +184,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const typeInputs = grid.querySelectorAll(`input[name="${type}"]`);
                     typeInputs.forEach(input => { input.value = ''; });
                 });
+                document.getElementById('painting_list').value = ''; // Clear painting list
                 loadRecentItems(); 
                 loadGlobalColorsRecap(); // Refresh global colors recap 
             } else {
@@ -101,6 +229,27 @@ document.addEventListener('DOMContentLoaded', function() {
                         ${item.reintegro === 'Si' ? '<span class="reintegro-badge">REINTEGRO</span>' : ''}
                         ${item.ricambi === 'Si' ? '<span class="ricambi-badge">RICAMBI</span>' : ''}
                     </div>
+                    ${item.painting_list && item.painting_list.trim() ? 
+                        `<div class="painting-list-preview-static">
+                            <span class="info-label">Painting List (${item.painting_list.split('\n').filter(c => c.trim()).length} codici):</span>
+                            <div class="painting-codes-table-static">
+                                <table>
+                                    <tbody>
+                                        ${item.painting_list.split('\n')
+                                            .filter(code => code.trim())
+                                            .map((code, index) => 
+                                                `<tr>
+                                                    <td>${index + 1}</td>
+                                                    <td>${code.trim()}</td>
+                                                </tr>`
+                                            ).join('')
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>` 
+                        : ''
+                    }
                     <div class="item-grid">
                         <div class="row-header"></div>
                         <div class="ub-header">UB 1</div>
@@ -190,6 +339,17 @@ function editItem(item) {
         });
     });
 
+    // Popola la Painting List
+    const editPaintingList = document.getElementById('editPaintingList');
+    if (editPaintingList) {
+        editPaintingList.value = item.painting_list || '';
+        updateScannedCodesTable(
+            editPaintingList, 
+            document.getElementById('editScannedCodesBody'), 
+            document.getElementById('editPaintingListCount')
+        );
+    }
+
     document.getElementById('editModal').style.display = 'block';
 }
 window.editItem = editItem; // Make it global
@@ -225,7 +385,8 @@ async function updateItem() {
         tavoli: [],
         pedane: [],
         contenitori: [],
-        spalle: []
+        spalle: [],
+        painting_list: document.getElementById('editPaintingList').value.trim()
     };
 
     const editFormGrid = document.querySelector('#editForm .ub-grid');

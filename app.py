@@ -10,8 +10,8 @@ def adapt_datetime(ts):
     return ts.isoformat()
 
 def item_row_to_dict(item_row):
-    # Handle both old format (without ricambi) and new format (with ricambi)
-    if len(item_row) == 32:  # Old format without ricambi
+    # Handle different formats based on length (with/without ricambi and painting_list)
+    if len(item_row) == 32:  # Old format without ricambi and painting_list
         return {
             'id': item_row[0],
             'colore': item_row[1],
@@ -19,6 +19,7 @@ def item_row_to_dict(item_row):
             'pronto': item_row[3],
             'reintegro': item_row[4],
             'ricambi': 'No',  # Default value for old records
+            'painting_list': '',  # Default value for old records
             'note': item_row[5],
             'carretti_vert': [item_row[6], item_row[7], item_row[8], item_row[9], item_row[10]],
             'tavoli': [item_row[11], item_row[12], item_row[13], item_row[14], item_row[15]],
@@ -27,21 +28,39 @@ def item_row_to_dict(item_row):
             'spalle': [item_row[26], item_row[27], item_row[28], item_row[29], item_row[30]],
             'timestamp': item_row[31]
         }
-    else:  # New format with ricambi (33 fields)
+    elif len(item_row) == 33:  # Format with ricambi but without painting_list
         return {
             'id': item_row[0],
             'colore': item_row[1],
             'sequenza': item_row[2],
             'pronto': item_row[3],
             'reintegro': item_row[4],
-            'ricambi': item_row[32] if item_row[32] else 'No',  # ricambi is the last field
+            'ricambi': item_row[32] if item_row[32] else 'No',
+            'painting_list': '',  # Default value when not present
             'note': item_row[5],
             'carretti_vert': [item_row[6], item_row[7], item_row[8], item_row[9], item_row[10]],
             'tavoli': [item_row[11], item_row[12], item_row[13], item_row[14], item_row[15]],
             'pedane': [item_row[16], item_row[17], item_row[18], item_row[19], item_row[20]],
             'contenitori': [item_row[21], item_row[22], item_row[23], item_row[24], item_row[25]],
             'spalle': [item_row[26], item_row[27], item_row[28], item_row[29], item_row[30]],
-            'timestamp': item_row[31]  # timestamp remains at index 31
+            'timestamp': item_row[31]
+        }
+    else:  # Latest format with ricambi and painting_list (34 fields)
+        return {
+            'id': item_row[0],
+            'colore': item_row[1],
+            'sequenza': item_row[2],
+            'pronto': item_row[3],
+            'reintegro': item_row[4],
+            'ricambi': item_row[32] if item_row[32] else 'No',
+            'painting_list': item_row[33] if len(item_row) > 33 and item_row[33] else '',
+            'note': item_row[5],
+            'carretti_vert': [item_row[6], item_row[7], item_row[8], item_row[9], item_row[10]],
+            'tavoli': [item_row[11], item_row[12], item_row[13], item_row[14], item_row[15]],
+            'pedane': [item_row[16], item_row[17], item_row[18], item_row[19], item_row[20]],
+            'contenitori': [item_row[21], item_row[22], item_row[23], item_row[24], item_row[25]],
+            'spalle': [item_row[26], item_row[27], item_row[28], item_row[29], item_row[30]],
+            'timestamp': item_row[31]
         }
 
 def init_db():
@@ -111,7 +130,16 @@ def init_db():
             print(f"Updated NULL/empty ricambi values in sequence_{i}")
         except sqlite3.OperationalError as e:
             print(f"Error updating ricambi values in sequence_{i}: {e}")
-    
+            
+        # Add painting_list column to existing tables if it doesn't exist
+        try:
+            c.execute(f'ALTER TABLE sequence_{i} ADD COLUMN painting_list TEXT DEFAULT ""')
+            print(f"Added painting_list column to sequence_{i}")
+        except sqlite3.OperationalError as e:
+            if "duplicate column name" not in str(e).lower():
+                print(f"Error adding painting_list column to sequence_{i}: {e}")
+            # Column already exists, ignore
+            pass
     conn.commit()
     conn.close()
 
@@ -157,8 +185,8 @@ def add_item():
     reintegro_val = "Si" if data.get('reintegro') == 'Si' else "No"
     ricambi_val = "Si" if data.get('ricambi') == 'Si' else "No"
 
-    columns = ['colore', 'sequenza', 'pronto', 'reintegro', 'ricambi', 'note']
-    values = [data['colore'], data['sequenza'], data['pronto'], reintegro_val, ricambi_val, data.get('note', '')]
+    columns = ['colore', 'sequenza', 'pronto', 'reintegro', 'ricambi', 'note', 'painting_list']
+    values = [data['colore'], data['sequenza'], data['pronto'], reintegro_val, ricambi_val, data.get('note', ''), data.get('painting_list', '')]
     
     for item_type in expected_arrays:
         for i in range(5):
@@ -266,8 +294,8 @@ def update_item(sequence, item_id):
     reintegro_val = "Si" if data.get('reintegro') == 'Si' else "No"
     ricambi_val = "Si" if data.get('ricambi') == 'Si' else "No"
 
-    columns_to_update = ['colore', 'pronto', 'reintegro', 'ricambi', 'note']
-    update_values = [data['colore'], data['pronto'], reintegro_val, ricambi_val, data.get('note','')]
+    columns_to_update = ['colore', 'pronto', 'reintegro', 'ricambi', 'note', 'painting_list']
+    update_values = [data['colore'], data['pronto'], reintegro_val, ricambi_val, data.get('note',''), data.get('painting_list', '')]
     
     for item_type in expected_arrays:
         for i in range(5):
