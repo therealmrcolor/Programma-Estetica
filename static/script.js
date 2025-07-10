@@ -2,10 +2,74 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('dataForm');
     const recentItemsList = document.getElementById('recentItemsList');
 
+    // Gestione sequenze attive
+    setupActiveSequences();
+    
     loadRecentItems(); 
     loadGlobalColorsRecap(); // Add global colors recap for homepage
     setupModal();
     setupPaintingList(); // Setup Painting List functionality
+
+    // Assicuriamoci che le sequenze attive siano evidenziate dopo il caricamento di tutto
+    highlightActiveSequences();
+
+    // Funzione per gestire le sequenze attive
+    function setupActiveSequences() {
+        // Controlla se siamo nella pagina di inserimento
+        const seqCheckboxes = document.querySelectorAll('.seq-active-cb');
+        if (seqCheckboxes.length > 0) {
+            // Siamo nella pagina di inserimento, inizializza i checkbox
+            const activeSeqs = getActiveSequences();
+            
+            seqCheckboxes.forEach(cb => {
+                const seqNum = cb.value;
+                cb.checked = activeSeqs.includes(seqNum);
+                
+                cb.addEventListener('change', function() {
+                    saveActiveSequences();
+                    highlightActiveSequences();
+                });
+            });
+        }
+        
+        // Evidenzia le sequenze attive nella barra di navigazione
+        highlightActiveSequences();
+    }
+    
+    // Funzione per salvare le sequenze attive nel localStorage
+    function saveActiveSequences() {
+        const seqCheckboxes = document.querySelectorAll('.seq-active-cb');
+        const activeSeqs = Array.from(seqCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+        
+        localStorage.setItem('activeSequences', JSON.stringify(activeSeqs));
+    }
+    
+    // Funzione per recuperare le sequenze attive dal localStorage
+    function getActiveSequences() {
+        const stored = localStorage.getItem('activeSequences');
+        return stored ? JSON.parse(stored) : [];
+    }
+    // Rendiamo globale anche questa funzione
+    window.getActiveSequences = getActiveSequences;
+    
+    // Funzione per evidenziare le sequenze attive nella barra di navigazione
+    function highlightActiveSequences() {
+        const activeSeqs = getActiveSequences();
+        const navItems = document.querySelectorAll('.nav-item[data-seq]');
+        
+        navItems.forEach(item => {
+            const seqNum = item.getAttribute('data-seq');
+            if (activeSeqs.includes(seqNum)) {
+                item.classList.add('active-sequence');
+            } else {
+                item.classList.remove('active-sequence');
+            }
+        });
+    }
+    // Rendiamo globale la funzione per poterla chiamare da qualsiasi pagina
+    window.highlightActiveSequences = highlightActiveSequences;
 
     // Funzione per gestire la Painting List
     function setupPaintingList() {
@@ -16,8 +80,8 @@ document.addEventListener('DOMContentLoaded', function() {
             'scannedCodesBody', 
             'paintingListCount', 
             'clearPaintingList',
-            'togglePaintingList',
-            'paintingListContainer'
+            null, // Il pulsante toggle non esiste più
+            null  // Il container è sempre visibile
         );
 
         // Edit modal
@@ -27,8 +91,8 @@ document.addEventListener('DOMContentLoaded', function() {
             'editScannedCodesBody', 
             'editPaintingListCount', 
             'editClearPaintingList',
-            'editTogglePaintingList',
-            'editPaintingListContainer'
+            null, // Il pulsante toggle non esiste più
+            null  // Il container è sempre visibile
         );
     }
 
@@ -38,9 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const tableBody = document.getElementById(tableBodyId);
         const countElement = document.getElementById(countId);
         const clearBtn = document.getElementById(clearBtnId);
-        const toggleBtn = document.getElementById(toggleBtnId);
-        const container = document.getElementById(containerId);
-
+        
         if (!scannerInput) return; // Element might not be on the page (e.g. sequence.html)
 
         scannerInput.addEventListener('keydown', function(event) {
@@ -60,14 +122,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateScannedCodesTable(hiddenInput, tableBody, countElement);
             });
         }
-
-        if (toggleBtn && container) {
-            toggleBtn.addEventListener('click', function() {
-                const isVisible = container.style.display === 'block';
-                container.style.display = isVisible ? 'none' : 'block';
-                toggleBtn.textContent = isVisible ? 'Mostra' : 'Nascondi';
-            });
-        }
+        
+        // Il pulsante mostra/nascondi è stato rimosso, la sezione è sempre visibile
     }
 
     function addCodeToPaintingList(code, hiddenInput, tableBody, countElement) {
@@ -467,6 +523,10 @@ async function updateItem() {
         if (typeof loadSequenceItems === 'function') {
             loadSequenceItems();
         }
+        // Aggiorna l'evidenziazione delle sequenze attive
+        if (typeof highlightActiveSequences === 'function') {
+            highlightActiveSequences();
+        }
 
     } catch (error) {
         console.error('Error in updateItem fetch:', error);
@@ -491,8 +551,12 @@ async function deleteItem(sequence, id) {
                 if (typeof loadGlobalColorsRecap === 'function') {
                     loadGlobalColorsRecap(); // Refresh global colors recap
                 }
-                 if (typeof loadSequenceItems === 'function') { // For sequence page
+                if (typeof loadSequenceItems === 'function') { // For sequence page
                     loadSequenceItems();
+                }
+                // Aggiorna l'evidenziazione delle sequenze attive
+                if (typeof highlightActiveSequences === 'function') {
+                    highlightActiveSequences();
                 }
             } else {
                 const errorMsg = result ? result.error : 'Errore durante l\'eliminazione dell\'elemento';

@@ -9,45 +9,63 @@
 <body>
     <nav>
         <a href="/" class="nav-item">Inserimento</a>
-        <a href="/sequence/1" class="nav-item">SEQ 1</a>
-        <a href="/sequence/2" class="nav-item">SEQ 2</a>
-        <a href="/sequence/3" class="nav-item">SEQ 3</a>
-        <a href="/sequence/4" class="nav-item">SEQ 4</a>
-        <a href="/sequence/5" class="nav-item">SEQ 5</a>
-        <a href="/sequence/6" class="nav-item">SEQ 6</a>
-        <a href="/sequence/7" class="nav-item">SEQ 7</a>
+        <a href="/sequence/1" class="nav-item" data-seq="1">SEQ 1</a>
+        <a href="/sequence/2" class="nav-item" data-seq="2">SEQ 2</a>
+        <a href="/sequence/3" class="nav-item" data-seq="3">SEQ 3</a>
+        <a href="/sequence/4" class="nav-item" data-seq="4">SEQ 4</a>
+        <a href="/sequence/5" class="nav-item" data-seq="5">SEQ 5</a>
+        <a href="/sequence/6" class="nav-item" data-seq="6">SEQ 6</a>
+        <a href="/sequence/7" class="nav-item" data-seq="7">SEQ 7</a>
     </nav>
 
     <div class="container">
-        <div class="sequence-header">
-            <div class="sequence-header-left">
-                <h1>Sequenza {{ seq_num }}</h1>
-                <button onclick="clearSequence({{ seq_num }})" class="clear-btn">Svuota Sequenza</button>
-            </div>
-        </div>
-        
-        <!-- Colori presenti spostato in alto -->
-        <div class="colors-recap-main">
-            <div class="colors-recap">
-                <div class="colors-header-with-button">
-                    <h3>Colori presenti</h3>
-                    <button id="copyColorsBtn" class="copy-colors-btn" onclick="copyColorsToClipboard()">📋 Copia Colori</button>
-                </div>
-                <div id="colorsList" class="colors-list">
-                    <div class="colors-header">
-                        <div class="colors-header-item">Colore</div>
-                        <div class="colors-header-item">Qty</div>
-                    </div>
-                    <div class="colors-empty">
-                        <div>Nessun colore presente</div>
-                    </div>
+        <!-- Aggiunto selettore sequenze attive sulla sinistra -->
+        <div class="sidebar">
+            <div class="active-sequences-selector">
+                <h3>SEQUENZE ATTIVE</h3>
+                <div class="active-sequences-checkboxes vertical">
+                    <label><input type="checkbox" class="seq-active-cb" value="1"> Sequenza 1</label>
+                    <label><input type="checkbox" class="seq-active-cb" value="2"> Sequenza 2</label>
+                    <label><input type="checkbox" class="seq-active-cb" value="3"> Sequenza 3</label>
+                    <label><input type="checkbox" class="seq-active-cb" value="4"> Sequenza 4</label>
+                    <label><input type="checkbox" class="seq-active-cb" value="5"> Sequenza 5</label>
+                    <label><input type="checkbox" class="seq-active-cb" value="6"> Sequenza 6</label>
+                    <label><input type="checkbox" class="seq-active-cb" value="7"> Sequenza 7</label>
                 </div>
             </div>
         </div>
         
-        <div class="main-content">
-            <div id="sequenceItems" class="sequence-items-container"></div>
-        </div>
+        <div class="main-area">
+            <div class="sequence-header">
+                <div class="sequence-header-left">
+                    <h1>Sequenza {{ seq_num }}</h1>
+                    <button onclick="clearSequence({{ seq_num }})" class="clear-btn">Svuota Sequenza</button>
+                </div>
+            </div>
+            
+            <!-- Colori presenti spostato in alto -->
+            <div class="colors-recap-main">
+                <div class="colors-recap">
+                    <div class="colors-header-with-button">
+                        <h3>Colori presenti</h3>
+                        <button id="copyColorsBtn" class="copy-colors-btn" onclick="copyColorsToClipboard()">📋 Copia Colori</button>
+                    </div>
+                    <div id="colorsList" class="colors-list">
+                        <div class="colors-header">
+                            <div class="colors-header-item">Colore</div>
+                            <div class="colors-header-item">Qty</div>
+                        </div>
+                        <div class="colors-empty">
+                            <div>Nessun colore presente</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="main-content">
+                <div id="sequenceItems" class="sequence-items-container"></div>
+            </div>
+        </div> <!-- Chiude main-area -->
     </div>
 
     <!-- Edit Modal -->

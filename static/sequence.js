@@ -1,6 +1,11 @@
 document.addEventListener('DOMContentLoaded', function() {
     loadSequenceItems();
     setupModal(); // This will use the global setupModal, editItem, updateItem, deleteItem from script.js if not redefined here
+    
+    // Evidenzia le sequenze attive nella barra di navigazione
+    if (typeof highlightActiveSequences === 'function') {
+        highlightActiveSequences();
+    }
 });
 
 // setupModal is defined in script.js and is global, so it can be reused
