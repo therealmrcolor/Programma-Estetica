@@ -48,7 +48,10 @@
                 <div class="colors-recap">
                     <div class="colors-header-with-button">
                         <h3>Colori presenti</h3>
-                        <button id="copyColorsBtn" class="copy-colors-btn" onclick="copyColorsToClipboard()">📋 Copia Colori</button>
+                        <div class="copy-buttons-group">
+                            <button id="copyColorsBtn" class="copy-colors-btn" onclick="copyColorsToClipboard()">📋 Copia Colori</button>
+                            <button class="copy-colors-btn-alt" onclick="showColorsModal()" title="Mostra colori in una finestra">📄 Mostra</button>
+                        </div>
                     </div>
                     <div id="colorsList" class="colors-list">
                         <div class="colors-header">

@@ -716,7 +716,14 @@ textarea {
     margin: 0;
 }
 
-/* Stile per il pulsante copia colori */
+/* Stile per il gruppo di pulsanti copia colori */
+.copy-buttons-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* Stile per il pulsante copia colori principale */
 .copy-colors-btn {
     background-color: #007bff;
     color: white;
@@ -742,6 +749,29 @@ textarea {
 .copy-colors-btn:disabled {
     background-color: #6c757d;
     cursor: not-allowed;
+}
+
+/* Stile per il pulsante alternativo */
+.copy-colors-btn-alt {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.copy-colors-btn-alt:hover {
+    background-color: #1e7e34;
+}
+
+.copy-colors-btn-alt:active {
+    transform: translateY(1px);
 }
 
 /* Painting List Preview in Sequence page */

@@ -672,26 +672,180 @@ async function copyColorsToClipboard() {
             throw new Error('Nessun colore da copiare');
         }
         
-        // Copia nella clipboard
+        // Crea il testo da copiare
         const colorsText = colors.join('\n');
-        await navigator.clipboard.writeText(colorsText);
         
-        // Feedback visuale
-        copyBtn.textContent = '✅ Copiato!';
-        setTimeout(() => {
-            copyBtn.textContent = '📋 Copia Colori';
-            copyBtn.disabled = false;
-        }, 2000);
+        // Prova prima la clipboard API moderna
+        if (navigator.clipboard && window.isSecureContext) {
+            try {
+                await navigator.clipboard.writeText(colorsText);
+                showCopySuccess(copyBtn);
+                return;
+            } catch (clipboardError) {
+                console.log('Clipboard API fallita, provo metodo alternativo:', clipboardError);
+            }
+        }
+        
+        // Fallback per browser più vecchi o contesti non sicuri (come HTTP su Windows)
+        const textArea = document.createElement('textarea');
+        textArea.value = colorsText;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        // Prova il comando document.execCommand (deprecated ma ancora supportato)
+        const successful = document.execCommand('copy');
+        document.body.removeChild(textArea);
+        
+        if (successful) {
+            showCopySuccess(copyBtn);
+        } else {
+            throw new Error('Metodo di copia fallback non riuscito');
+        }
         
     } catch (error) {
         console.error('Errore durante la copia:', error);
-        copyBtn.textContent = '❌ Errore';
-        setTimeout(() => {
-            copyBtn.textContent = '📋 Copia Colori';
-            copyBtn.disabled = false;
-        }, 2000);
+        showCopyError(copyBtn, error.message);
     }
 }
 
-// Rende la funzione globale per l'uso negli onclick HTML
+// Funzione helper per mostrare successo
+function showCopySuccess(copyBtn) {
+    copyBtn.textContent = '✅ Copiato!';
+    setTimeout(() => {
+        copyBtn.textContent = '📋 Copia Colori';
+        copyBtn.disabled = false;
+    }, 2000);
+}
+
+// Funzione helper per mostrare errore
+function showCopyError(copyBtn, errorMessage) {
+    copyBtn.textContent = '❌ Errore';
+    console.error('Dettagli errore copia:', errorMessage);
+    
+    // Mostra un alert con istruzioni alternative
+    setTimeout(() => {
+        alert('Impossibile copiare automaticamente. Prova:\n\n1. Usa Ctrl+A per selezionare tutto\n2. Usa Ctrl+C per copiare\n\nOppure prova ad accedere al sito tramite HTTPS.');
+    }, 100);
+    
+    setTimeout(() => {
+        copyBtn.textContent = '📋 Copia Colori';
+        copyBtn.disabled = false;
+    }, 2000);
+}
+
+// Funzione alternativa per mostrare i colori in un modal
+function showColorsModal() {
+    let colors = [];
+    
+    // Controlla se siamo nella homepage (globalColorsList) o in una pagina sequenza (colorsList)
+    const globalColorsEl = document.getElementById('globalColorsList');
+    const sequenceColorsEl = document.getElementById('colorsList');
+    
+    if (globalColorsEl && globalColorsEl.style.display !== 'none') {
+        // Homepage - estrai colori dal recap globale
+        const colorRows = globalColorsEl.querySelectorAll('.global-color-row');
+        colorRows.forEach(row => {
+            const colorElement = row.querySelector('.global-color-item');
+            if (colorElement) {
+                const colorText = colorElement.textContent.trim();
+                if (colorText && !colors.includes(colorText)) {
+                    colors.push(colorText);
+                }
+            }
+        });
+    } else if (sequenceColorsEl) {
+        // Pagina sequenza - estrai colori dal recap della sequenza
+        const colorRows = sequenceColorsEl.querySelectorAll('.color-row');
+        colorRows.forEach(row => {
+            const colorElement = row.querySelector('.color-item');
+            if (colorElement) {
+                const colorText = colorElement.textContent.trim();
+                if (colorText && !colors.includes(colorText)) {
+                    colors.push(colorText);
+                }
+            }
+        });
+    }
+    
+    if (colors.length === 0) {
+        alert('Nessun colore trovato');
+        return;
+    }
+    
+    // Crea il modal
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    `;
+    
+    const modalContent = document.createElement('div');
+    modalContent.style.cssText = `
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        max-width: 400px;
+        width: 90%;
+        max-height: 70%;
+        overflow-y: auto;
+    `;
+    
+    const textarea = document.createElement('textarea');
+    textarea.value = colors.join('\n');
+    textarea.style.cssText = `
+        width: 100%;
+        height: 300px;
+        font-family: monospace;
+        font-size: 14px;
+        resize: vertical;
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin: 10px 0;
+    `;
+    textarea.readOnly = true;
+    
+    const instructions = document.createElement('p');
+    instructions.innerHTML = '<strong>Seleziona tutto il testo (Ctrl+A) e copialo (Ctrl+C)</strong>';
+    instructions.style.margin = '0 0 10px 0';
+    
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = 'Chiudi';
+    closeBtn.style.cssText = `
+        background: #666;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 10px;
+    `;
+    
+    closeBtn.onclick = () => document.body.removeChild(modal);
+    modal.onclick = (e) => { if (e.target === modal) document.body.removeChild(modal); };
+    
+    modalContent.appendChild(instructions);
+    modalContent.appendChild(textarea);
+    modalContent.appendChild(closeBtn);
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+    
+    // Seleziona tutto il testo automaticamente
+    textarea.select();
+    textarea.focus();
+}
+
+// Rende le funzioni globali per l'uso negli onclick HTML
 window.copyColorsToClipboard = copyColorsToClipboard;
+window.showColorsModal = showColorsModal;
