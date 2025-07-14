@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (clearBtn) {
             clearBtn.addEventListener('click', function() {
                 hiddenInput.value = '';
-                updateScannedCodesTable(hiddenInput, tableBody, countElement);
+                window.updateScannedCodesTable(hiddenInput, tableBody, countElement);
             });
         }
         
@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!currentCodes.includes(code)) { 
             currentCodes.push(code);
             hiddenInput.value = currentCodes.join('\n');
-            updateScannedCodesTable(hiddenInput, tableBody, countElement);
+            window.updateScannedCodesTable(hiddenInput, tableBody, countElement);
         }
     }
     
@@ -140,8 +140,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const lines = hiddenInput.value.split('\n');
         lines.splice(index, 1);
         hiddenInput.value = lines.join('\n');
-        updateScannedCodesTable(hiddenInput, tableBody, countElement);
+        window.updateScannedCodesTable(hiddenInput, tableBody, countElement);
     }
+    
+    // Rendi la funzione globale
+    window.removeCodeFromPaintingList = removeCodeFromPaintingList;
 
     // Funzione per aggiornare la tabella dei codici scansionati
     function updateScannedCodesTable(hiddenInput, tableBody, countElement) {
@@ -173,7 +176,7 @@ document.addEventListener('DOMContentLoaded', function() {
             removeBtn.className = 'remove-code-btn';
             removeBtn.textContent = 'Rimuovi';
             removeBtn.addEventListener('click', function() {
-                removeCodeFromPaintingList(index, hiddenInput, tableBody, countElement);
+                window.removeCodeFromPaintingList(index, hiddenInput, tableBody, countElement);
             });
             
             tdAction.appendChild(removeBtn);
@@ -186,6 +189,9 @@ document.addEventListener('DOMContentLoaded', function() {
             countElement.textContent = lines.length;
         }
     }
+    
+    // Rendi la funzione globale per l'uso nell'editItem
+    window.updateScannedCodesTable = updateScannedCodesTable;
     
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -366,6 +372,7 @@ function setupModal() {
         updateItem(); 
     }
 }
+window.setupModal = setupModal; // Make it globally accessible
 
 function editItem(item) {
     document.getElementById('editItemId').value = item.id;
@@ -399,7 +406,7 @@ function editItem(item) {
     const editPaintingList = document.getElementById('editPaintingList');
     if (editPaintingList) {
         editPaintingList.value = item.painting_list || '';
-        updateScannedCodesTable(
+        window.updateScannedCodesTable(
             editPaintingList, 
             document.getElementById('editScannedCodesBody'), 
             document.getElementById('editPaintingListCount')

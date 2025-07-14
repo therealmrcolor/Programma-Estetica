@@ -19,8 +19,8 @@
     </nav>
 
     <div class="container">
-        <!-- Sidebar con selettore sequenze attive -->
-        <div class="sidebar">
+        <!-- Sidebar sinistra - Sequenze Attive -->
+        <div class="sidebar sidebar-left">
             <div class="active-sequences-selector">
                 <h3>SEQUENZE ATTIVE</h3>
                 <div class="active-sequences-checkboxes vertical">
@@ -34,14 +34,10 @@
                 </div>
             </div>
         </div>
-        
-        <!-- Contenuto principale -->
-        <div class="main-area">
-            <h1>Inserimento Dati</h1>
-            
-            <!-- Recap colori globale spostato in alto -->
-            <div class="colors-recap-main">
-                <div class="colors-recap">
+
+        <!-- Sidebar destra - Recap Colori (posizione fissa) -->
+        <div class="sidebar sidebar-right">
+            <div class="colors-recap-main">                <div class="colors-recap">
                     <div class="colors-header-with-button">
                         <h3>Recap colori globale</h3>
                         <button id="copyColorsBtn" class="copy-colors-btn" onclick="copyColorsToClipboard()">📋 Copia Colori</button>
@@ -53,12 +49,17 @@
                             <div class="colors-header-item">Qty</div>
                         </div>
                         <div class="colors-empty">
-                            <div colspan="3">Nessun elemento presente</div>
+                            <div>Nessun elemento presente</div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
+        <!-- Area principale centrale -->
+        <div class="main-area">
+            <h1>Inserimento Dati</h1>
+            
             <div class="main-content">
                 <div class="form-section">
                     <form id="dataForm" class="data-form">
@@ -174,9 +175,7 @@
                     <input type="text" name="spalle" value="">
                     <input type="text" name="spalle" value="">
                     <input type="text" name="spalle" value="">
-                </div>
-
-                <button type="submit" class="submit-btn">Aggiungi</button>
+                </div>                <button type="submit" class="submit-btn">Aggiungi</button>
             </form>
                 </div>
             </div>

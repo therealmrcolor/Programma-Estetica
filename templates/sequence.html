@@ -76,6 +76,10 @@
             <form id="editForm" class="data-form">
                 <div class="form-row">
                     <div class="form-group">
+                        <label for="editColore">COLORE</label>
+                        <input type="text" id="editColore" name="colore" required>
+                    </div>
+                    <div class="form-group">
                         <label for="editSequenza">SEQUENZA</label>
                         <select id="editSequenza" name="sequenza" required>
                             <option value="1">1</option>
@@ -88,10 +92,6 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="editColore">COLORE</label>
-                        <input type="text" id="editColore" name="colore" required>
-                    </div>
-                    <div class="form-group">
                         <label for="editPronto">PRONTO</label>
                         <select id="editPronto" name="pronto" required>
                             <option value="Si">Si</option>
@@ -99,8 +99,8 @@
                         </select>
                     </div>
                 </div>
-                <div class="form-row">
-                     <div class="form-group form-group-reintegro">
+                 <div class="form-row">
+                    <div class="form-group form-group-reintegro">
                         <input type="checkbox" id="editReintegro" name="reintegro">
                         <label for="editReintegro" class="reintegro-label">REINTEGRO</label>
                     </div>
@@ -113,6 +113,34 @@
                 <div class="form-group full-width">
                     <label for="editNote">NOTE</label>
                     <textarea id="editNote" name="note"></textarea>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="editPaintingListScanner">PAINTING LIST</label>
+                    <div class="painting-list-container">
+                        <div class="painting-list-input-wrapper">
+                            <input type="text" id="editPaintingListScanner" placeholder="Scannerizza un codice e premi Invio">
+                            <button type="button" id="editClearPaintingList" class="clear-btn">Pulisci Lista</button>
+                        </div>
+                        <div class="painting-list-info">
+                            <span>Codici scansionati: <strong id="editPaintingListCount">0</strong></span>
+                        </div>
+                        <div id="editScannedCodesTable" class="scanned-codes-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Codice</th>
+                                        <th>Azione</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="editScannedCodesBody">
+                                    <!-- I codici scansionati appariranno qui -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <input type="hidden" id="editPaintingList" name="painting_list">
                 </div>
 
                 <div class="ub-grid">

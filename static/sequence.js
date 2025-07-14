@@ -2,11 +2,54 @@ document.addEventListener('DOMContentLoaded', function() {
     loadSequenceItems();
     setupModal(); // This will use the global setupModal, editItem, updateItem, deleteItem from script.js if not redefined here
     
+    // Setup Painting List functionality for the edit modal
+    setupPaintingListForEditModal();
+    
     // Evidenzia le sequenze attive nella barra di navigazione
     if (typeof highlightActiveSequences === 'function') {
         highlightActiveSequences();
     }
 });
+
+// Function to setup Painting List for edit modal in sequence page
+function setupPaintingListForEditModal() {
+    // Setup painting list for edit modal using the same approach as in script.js
+    const scannerInput = document.getElementById('editPaintingListScanner');
+    const hiddenInput = document.getElementById('editPaintingList');
+    const tableBody = document.getElementById('editScannedCodesBody');
+    const countElement = document.getElementById('editPaintingListCount');
+    const clearBtn = document.getElementById('editClearPaintingList');
+    
+    if (!scannerInput) return; // Element might not be on the page
+
+    scannerInput.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Evita il submit del form
+            const code = scannerInput.value.trim();
+            if (code) {
+                addCodeToPaintingListLocal(code, hiddenInput, tableBody, countElement);
+                scannerInput.value = '';
+            }
+        }
+    });
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+            hiddenInput.value = '';
+            window.updateScannedCodesTable(hiddenInput, tableBody, countElement);
+        });
+    }
+}
+
+function addCodeToPaintingListLocal(code, hiddenInput, tableBody, countElement) {
+    const currentCodes = hiddenInput.value ? hiddenInput.value.split('\n') : [];
+    // Evita duplicati
+    if (!currentCodes.includes(code)) { 
+        currentCodes.push(code);
+        hiddenInput.value = currentCodes.join('\n');
+        window.updateScannedCodesTable(hiddenInput, tableBody, countElement);
+    }
+}
 
 // setupModal is defined in script.js and is global, so it can be reused
 // editItem is defined in script.js and is global
