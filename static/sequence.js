@@ -78,7 +78,14 @@ async function loadSequenceItems() {
         
         const escapeForHtmlAttr = (jsonString) => jsonString.replace(/'/g, "'");
 
-        sequenceItemsEl.innerHTML = items.map(item => `
+        // Ordina gli elementi alfabeticamente per colore
+        const sortedItems = items.sort((a, b) => {
+            const colorA = (a.colore || '').trim().toUpperCase();
+            const colorB = (b.colore || '').trim().toUpperCase();
+            return colorA.localeCompare(colorB);
+        });
+
+        sequenceItemsEl.innerHTML = sortedItems.map(item => `
             <div id="color-${encodeURIComponent(item.colore)}" class="sequence-item ${item.reintegro === 'Si' ? 'item-reintegro' : ''} ${item.ricambi === 'Si' ? 'item-ricambi' : ''}">
                 <div class="item-actions">
                     <button class="edit-btn" onclick='editItem(${escapeForHtmlAttr(JSON.stringify(item))})'>✎</button>
@@ -324,33 +331,75 @@ async function copyColorsToClipboard() {
         copyBtn.disabled = true;
         copyBtn.textContent = '📋 Copiando...';
         
-        let colors = [];
+        let colorData = [];
         
-        // Estrai colori dal recap della sequenza
-        const sequenceColorsEl = document.getElementById('colorsList');
-        if (sequenceColorsEl) {
-            const colorRows = sequenceColorsEl.querySelectorAll('.color-row');
-            colorRows.forEach(row => {
-                const colorElement = row.querySelector('.color-item');
-                if (colorElement) {
-                    const colorText = colorElement.textContent.trim();
-                    if (colorText && !colors.includes(colorText)) {
-                        colors.push(colorText);
-                    }
+        // Estrai colori dal recap della sequenza e cerca gli elementi completi
+        const response = await fetch(`/api/get_items/${sequenceNum}`);
+        if (response.ok) {
+            const items = await response.json();
+            const colorMap = new Map();
+            
+            console.log('SEQUENCE.JS - Items received for sequence:', items);
+            
+            items.forEach(item => {
+                const status = (item.reintegro === 'Si' || item.ricambi === 'Si') ? 'R' : 'E';
+                const key = `${item.colore}-${status}`;
+                
+                console.log(`SEQUENCE.JS - Processing: ${item.colore}, reintegro: ${item.reintegro}, ricambi: ${item.ricambi}, status: ${status}, key: ${key}`);
+                
+                // Mantieni solo una riga per ogni combinazione colore-status
+                if (!colorMap.has(key)) {
+                    colorMap.set(key, `${item.colore},${status},${item.sequenza}`);
+                    console.log(`SEQUENCE.JS - Added to map: ${key} -> ${item.colore},${status},${item.sequenza}`);
+                } else {
+                    console.log(`SEQUENCE.JS - Key ${key} already exists, skipping`);
                 }
             });
+            
+            console.log('SEQUENCE.JS - Final colorMap entries:', Array.from(colorMap.entries()));
+            colorData = Array.from(colorMap.values());
+            console.log('SEQUENCE.JS - Final colorData:', colorData);
         }
         
-        if (colors.length === 0) {
+        if (colorData.length === 0) {
             throw new Error('Nessun colore da copiare');
         }
         
-        // Copia nella clipboard
-        const colorsText = colors.join('\n');
-        await navigator.clipboard.writeText(colorsText);
+        // Prova prima la clipboard API moderna
+        const colorsText = colorData.join('\n');
+        if (navigator.clipboard && window.isSecureContext) {
+            try {
+                await navigator.clipboard.writeText(colorsText);
+                copyBtn.textContent = '✅ Copiato!';
+                setTimeout(() => {
+                    copyBtn.textContent = '📋 Copia Colori';
+                    copyBtn.disabled = false;
+                }, 2000);
+                return;
+            } catch (clipboardError) {
+                console.log('Clipboard API fallita, provo metodo alternativo:', clipboardError);
+            }
+        }
         
-        // Feedback visuale
-        copyBtn.textContent = '✅ Copiato!';
+        // Fallback per browser più vecchi
+        const textArea = document.createElement('textarea');
+        textArea.value = colorsText;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        const successful = document.execCommand('copy');
+        document.body.removeChild(textArea);
+        
+        if (successful) {
+            copyBtn.textContent = '✅ Copiato!';
+        } else {
+            throw new Error('Metodo di copia fallback non riuscito');
+        }
+        
         setTimeout(() => {
             copyBtn.textContent = '📋 Copia Colori';
             copyBtn.disabled = false;

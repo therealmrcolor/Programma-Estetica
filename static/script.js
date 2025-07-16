@@ -636,44 +636,84 @@ async function copyColorsToClipboard() {
         copyBtn.disabled = true;
         copyBtn.textContent = '📋 Copiando...';
         
-        let colors = [];
+        let colorData = [];
         
         // Controlla se siamo nella homepage (globalColorsList) o in una pagina sequenza (colorsList)
         const globalColorsEl = document.getElementById('globalColorsList');
         const sequenceColorsEl = document.getElementById('colorsList');
         
         if (globalColorsEl && globalColorsEl.style.display !== 'none') {
-            // Homepage - estrai colori dal recap globale
-            const colorRows = globalColorsEl.querySelectorAll('.global-color-row');
-            colorRows.forEach(row => {
-                const colorElement = row.querySelector('.global-color-item');
-                if (colorElement) {
-                    const colorText = colorElement.textContent.trim();
-                    if (colorText && !colors.includes(colorText)) {
-                        colors.push(colorText);
+            // Homepage - estrai colori dal recap globale e cerca gli elementi completi
+            const response = await fetch('/api/get_recent_items_all');
+            if (response.ok) {
+                const items = await response.json();
+                const colorMap = new Map();
+                
+                items.forEach(item => {
+                    const status = (item.reintegro === 'Si' || item.ricambi === 'Si') ? 'R' : 'E';
+                    const key = `${item.colore}-${status}-${item.sequenza}`;
+                    
+                    if (!colorMap.has(key)) {
+                        colorMap.set(key, `${item.colore},${status},${item.sequenza}`);
                     }
-                }
-            });
+                });
+                
+                colorData = Array.from(colorMap.values());
+                
+                // Ordina alfabeticamente per colore (come nella visualizzazione)
+                colorData.sort((a, b) => {
+                    const colorA = a.split(',')[0]; // Estrae il colore dalla stringa "RAL3020,E,3"
+                    const colorB = b.split(',')[0];
+                    return colorA.localeCompare(colorB);
+                });
+            }
         } else if (sequenceColorsEl) {
-            // Pagina sequenza - estrai colori dal recap della sequenza
-            const colorRows = sequenceColorsEl.querySelectorAll('.color-row');
-            colorRows.forEach(row => {
-                const colorElement = row.querySelector('.color-item');
-                if (colorElement) {
-                    const colorText = colorElement.textContent.trim();
-                    if (colorText && !colors.includes(colorText)) {
-                        colors.push(colorText);
-                    }
+            // Pagina sequenza - estrai colori dal recap della sequenza e cerca gli elementi
+            const sequenceNum = window.sequenceNum || document.URL.match(/\/sequence\/(\d+)/)?.[1];
+            if (sequenceNum) {
+                const response = await fetch(`/api/get_items/${sequenceNum}`);
+                if (response.ok) {
+                    const items = await response.json();
+                    const colorMap = new Map();
+                    
+                    console.log('COPY FUNCTION - Items received for sequence:', items);
+                    
+                    items.forEach(item => {
+                        const status = (item.reintegro === 'Si' || item.ricambi === 'Si') ? 'R' : 'E';
+                        const key = `${item.colore}-${status}`;
+                        
+                        console.log(`COPY - Processing: ${item.colore}, reintegro: ${item.reintegro}, ricambi: ${item.ricambi}, status: ${status}, key: ${key}`);
+                        
+                        // Mantieni solo una riga per ogni combinazione colore-status
+                        if (!colorMap.has(key)) {
+                            colorMap.set(key, `${item.colore},${status},${item.sequenza}`);
+                            console.log(`COPY - Added to map: ${key} -> ${item.colore},${status},${item.sequenza}`);
+                        } else {
+                            console.log(`COPY - Key ${key} already exists, skipping`);
+                        }
+                    });
+                    
+                    console.log('COPY - Final colorMap entries:', Array.from(colorMap.entries()));
+                    colorData = Array.from(colorMap.values());
+                    
+                    // Ordina alfabeticamente per colore (come nella visualizzazione)
+                    colorData.sort((a, b) => {
+                        const colorA = a.split(',')[0]; // Estrae il colore dalla stringa "RAL3020,E,3"
+                        const colorB = b.split(',')[0];
+                        return colorA.localeCompare(colorB);
+                    });
+                    
+                    console.log('COPY - Final colorData (sorted):', colorData);
                 }
-            });
+            }
         }
         
-        if (colors.length === 0) {
+        if (colorData.length === 0) {
             throw new Error('Nessun colore da copiare');
         }
         
         // Crea il testo da copiare
-        const colorsText = colors.join('\n');
+        const colorsText = colorData.join('\n');
         
         // Prova prima la clipboard API moderna
         if (navigator.clipboard && window.isSecureContext) {
@@ -738,112 +778,150 @@ function showCopyError(copyBtn, errorMessage) {
 }
 
 // Funzione alternativa per mostrare i colori in un modal
-function showColorsModal() {
-    let colors = [];
+async function showColorsModal() {
+    let colorData = [];
     
-    // Controlla se siamo nella homepage (globalColorsList) o in una pagina sequenza (colorsList)
-    const globalColorsEl = document.getElementById('globalColorsList');
-    const sequenceColorsEl = document.getElementById('colorsList');
-    
-    if (globalColorsEl && globalColorsEl.style.display !== 'none') {
-        // Homepage - estrai colori dal recap globale
-        const colorRows = globalColorsEl.querySelectorAll('.global-color-row');
-        colorRows.forEach(row => {
-            const colorElement = row.querySelector('.global-color-item');
-            if (colorElement) {
-                const colorText = colorElement.textContent.trim();
-                if (colorText && !colors.includes(colorText)) {
-                    colors.push(colorText);
+    try {
+        // Controlla se siamo nella homepage (globalColorsList) o in una pagina sequenza (colorsList)
+        const globalColorsEl = document.getElementById('globalColorsList');
+        const sequenceColorsEl = document.getElementById('colorsList');
+        
+        if (globalColorsEl && globalColorsEl.style.display !== 'none') {
+            // Homepage - estrai colori dal recap globale e cerca gli elementi completi
+            const response = await fetch('/api/get_recent_items_all');
+            if (response.ok) {
+                const items = await response.json();
+                const colorMap = new Map();
+                
+                items.forEach(item => {
+                    const status = (item.reintegro === 'Si' || item.ricambi === 'Si') ? 'R' : 'E';
+                    const key = `${item.colore}-${status}-${item.sequenza}`;
+                    
+                    if (!colorMap.has(key)) {
+                        colorMap.set(key, `${item.colore},${status},${item.sequenza}`);
+                    }
+                });
+                
+                colorData = Array.from(colorMap.values());
+            }
+        } else if (sequenceColorsEl) {
+            // Pagina sequenza - estrai colori dal recap della sequenza e cerca gli elementi
+            const sequenceNum = window.sequenceNum || document.URL.match(/\/sequence\/(\d+)/)?.[1];
+            if (sequenceNum) {
+                const response = await fetch(`/api/get_items/${sequenceNum}`);
+                if (response.ok) {
+                    const items = await response.json();
+                    const colorMap = new Map();
+                    
+                    items.forEach(item => {
+                        const status = (item.reintegro === 'Si' || item.ricambi === 'Si') ? 'R' : 'E';
+                        const key = `${item.colore}-${status}`;
+                        
+                        // Mantieni solo una riga per ogni combinazione colore-status
+                        if (!colorMap.has(key)) {
+                            colorMap.set(key, `${item.colore},${status},${item.sequenza}`);
+                        }
+                    });
+                    
+                    colorData = Array.from(colorMap.values());
                 }
             }
-        });
-    } else if (sequenceColorsEl) {
-        // Pagina sequenza - estrai colori dal recap della sequenza
-        const colorRows = sequenceColorsEl.querySelectorAll('.color-row');
-        colorRows.forEach(row => {
-            const colorElement = row.querySelector('.color-item');
-            if (colorElement) {
-                const colorText = colorElement.textContent.trim();
-                if (colorText && !colors.includes(colorText)) {
-                    colors.push(colorText);
-                }
-            }
-        });
+        }
+        
+        // Ordina alfabeticamente per colore (come nella visualizzazione)
+        if (colorData.length > 0) {
+            colorData.sort((a, b) => {
+                const colorA = a.split(',')[0]; // Estrae il colore dalla stringa "RAL3020,E,3"
+                const colorB = b.split(',')[0];
+                return colorA.localeCompare(colorB);
+            });
+        }
+        
+        if (colorData.length === 0) {
+            alert('Nessun colore trovato');
+            return;
+        }
+        
+        // Crea il modal
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        `;
+        
+        const modalContent = document.createElement('div');
+        modalContent.style.cssText = `
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 70%;
+            overflow-y: auto;
+        `;
+        
+        const title = document.createElement('h3');
+        title.textContent = 'Colori con Stato e Sequenza';
+        title.style.margin = '0 0 15px 0';
+        
+        const textarea = document.createElement('textarea');
+        textarea.value = colorData.join('\n');
+        textarea.style.cssText = `
+            width: 100%;
+            height: 300px;
+            font-family: monospace;
+            font-size: 14px;
+            resize: vertical;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px 0;
+        `;
+        textarea.readOnly = true;
+        
+        const instructions = document.createElement('p');
+        instructions.innerHTML = '<strong>Formato:</strong> Colore,Stato,Sequenza<br><strong>Stato:</strong> E = Normale, R = Reintegro/Ricambi<br><br><strong>Seleziona tutto (Ctrl+A) e copia (Ctrl+C)</strong>';
+        instructions.style.margin = '0 0 10px 0';
+        instructions.style.fontSize = '14px';
+        instructions.style.color = '#666';
+        
+        const closeBtn = document.createElement('button');
+        closeBtn.textContent = 'Chiudi';
+        closeBtn.style.cssText = `
+            background: #666;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        `;
+        
+        closeBtn.onclick = () => document.body.removeChild(modal);
+        modal.onclick = (e) => { if (e.target === modal) document.body.removeChild(modal); };
+        
+        modalContent.appendChild(title);
+        modalContent.appendChild(instructions);
+        modalContent.appendChild(textarea);
+        modalContent.appendChild(closeBtn);
+        modal.appendChild(modalContent);
+        document.body.appendChild(modal);
+        
+        // Seleziona tutto il testo automaticamente
+        textarea.select();
+        textarea.focus();
+        
+    } catch (error) {
+        console.error('Errore nel caricamento dei dati:', error);
+        alert('Errore nel caricamento dei dati');
     }
-    
-    if (colors.length === 0) {
-        alert('Nessun colore trovato');
-        return;
-    }
-    
-    // Crea il modal
-    const modal = document.createElement('div');
-    modal.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0,0,0,0.5);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-    `;
-    
-    const modalContent = document.createElement('div');
-    modalContent.style.cssText = `
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        max-width: 400px;
-        width: 90%;
-        max-height: 70%;
-        overflow-y: auto;
-    `;
-    
-    const textarea = document.createElement('textarea');
-    textarea.value = colors.join('\n');
-    textarea.style.cssText = `
-        width: 100%;
-        height: 300px;
-        font-family: monospace;
-        font-size: 14px;
-        resize: vertical;
-        border: 1px solid #ccc;
-        padding: 10px;
-        margin: 10px 0;
-    `;
-    textarea.readOnly = true;
-    
-    const instructions = document.createElement('p');
-    instructions.innerHTML = '<strong>Seleziona tutto il testo (Ctrl+A) e copialo (Ctrl+C)</strong>';
-    instructions.style.margin = '0 0 10px 0';
-    
-    const closeBtn = document.createElement('button');
-    closeBtn.textContent = 'Chiudi';
-    closeBtn.style.cssText = `
-        background: #666;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 4px;
-        cursor: pointer;
-        margin-top: 10px;
-    `;
-    
-    closeBtn.onclick = () => document.body.removeChild(modal);
-    modal.onclick = (e) => { if (e.target === modal) document.body.removeChild(modal); };
-    
-    modalContent.appendChild(instructions);
-    modalContent.appendChild(textarea);
-    modalContent.appendChild(closeBtn);
-    modal.appendChild(modalContent);
-    document.body.appendChild(modal);
-    
-    // Seleziona tutto il testo automaticamente
-    textarea.select();
-    textarea.focus();
 }
 
 // Rende le funzioni globali per l'uso negli onclick HTML
